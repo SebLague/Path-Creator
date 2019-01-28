@@ -7,9 +7,9 @@ namespace PathCreationEditor
     public static class MouseUtility
     {
         /// <summary>
-		/// Determines mouse position in world. If PathSpace is xy/xz, the position will be locked to that plane.
-		/// If PathSpace is xyz, then depthFor3DSpace will be used as distance from scene camera.
-		/// </summary>
+        /// Determines mouse position in world. If PathSpace is xy/xz, the position will be locked to that plane.
+        /// If PathSpace is xyz, then depthFor3DSpace will be used as distance from scene camera.
+        /// </summary>
         public static Vector3 GetMouseWorldPosition(PathSpace space, float depthFor3DSpace = 10)
         {
             Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);

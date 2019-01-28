@@ -6,7 +6,7 @@ namespace PathCreation.Utility
     public static class VertexPathUtility
     {
 
-		public static PathSplitData SplitBezierPathByAngleError(BezierPath bezierPath, float maxAngleError, float minVertexDst, float accuracy)
+        public static PathSplitData SplitBezierPathByAngleError(BezierPath bezierPath, float maxAngleError, float minVertexDst, float accuracy)
         {
 			PathSplitData splitData = new PathSplitData();
 
