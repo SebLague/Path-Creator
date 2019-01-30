@@ -22,12 +22,12 @@ namespace PathCreationEditor
 
         [Header("Anchor Colours")]
         public Color anchor = new Color(0.95f, 0.25f, 0.25f, 0.85f);
-        public Color anchorHighlighted = new Color(1, 0.4f, 0.4f);
+        public Color anchorHighlighted = new Color(1, 0.57f, 0.4f);
         public Color anchorSelected = Color.white;
 
         [Header("Control Colours")]
         public Color control = new Color(0.35f, 0.6f, 1, 0.85f);
-        public Color controlHighlighted = new Color(0.6f, 0.6f, 1);
+        public Color controlHighlighted = new Color(0.8f, 0.67f, 0.97f);
         public Color controlSelected = Color.white;
         public Color handleDisabled = new Color(1, 1, 1, 0.2f);
         public Color controlLine = new Color(0, 0, 0, 0.35f);
