@@ -26,15 +26,15 @@ namespace PathCreationEditor
             LMBRelease,
         };
 
-        static readonly int hint;
         static float dstMouseToDragPointStart;
 
         static List<int> ids;
+        static HashSet<int> idHash;
 
         static PathHandle()
         {
-            hint = 109264;
             ids = new List<int>();
+            idHash = new HashSet<int>();
 
             dstMouseToDragPointStart = float.MaxValue;
         }
@@ -201,7 +201,26 @@ namespace PathCreationEditor
             int numToAdd = (upToIndex - numIDAtStart) + 1;
             for (int i = 0; i < numToAdd; i++)
             {
-                ids.Add(GUIUtility.GetControlID(hint + numIDAtStart + i, FocusType.Passive));//
+                string hashString = string.Format("pathhandle({0})", numIDAtStart + i);
+                int hash = hashString.GetHashCode();
+
+                int id = GUIUtility.GetControlID(hash, FocusType.Passive);
+                int numIts = 0;
+
+                // This is a bit of a shot in the dark at fixing a reported bug that I've been unable to reproduce.
+                // The problem is that multiple handles are being selected when just one is clicked on.
+                // I assume this is because they're somehow being assigned the same id.
+                while (idHash.Contains(id)) {
+                    numIts ++;
+                    id += numIts * numIts;
+                    if (numIts > 10) {
+                        Debug.LogError("Failed to generate unique handle id.");
+                        break;
+                    }
+                }
+
+                idHash.Add(id);
+                ids.Add(id);
             }
         }
 

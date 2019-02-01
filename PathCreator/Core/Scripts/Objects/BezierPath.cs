@@ -358,7 +358,7 @@ namespace PathCreation
         /// Insert new anchor point at given position. Automatically place control points around it so as to keep shape of curve the same
         public void SplitSegment(Vector3 anchorPos, int segmentIndex, float splitTime)
         {
-
+            splitTime = Mathf.Clamp01(splitTime);
             anchorPos -= localPosition;
 
             if (controlMode == ControlMode.Automatic)
@@ -388,9 +388,11 @@ namespace PathCreation
             // Insert angle for new anchor (value should be set inbetween neighbour anchor angles)
             int newAnchorAngleIndex = segmentIndex + 1;
             int numAngles = perAnchorNormalsAngle.Count;
-            float anglePrev = (newAnchorAngleIndex > 0 || isClosed) ? perAnchorNormalsAngle[(newAnchorAngleIndex - 1 + numAngles) % numAngles] : 0;
-            float angleNext = (newAnchorAngleIndex < numAngles || isClosed) ? perAnchorNormalsAngle[(newAnchorAngleIndex + 1) % numAngles] : 0;
-            perAnchorNormalsAngle.Insert(newAnchorAngleIndex, (anglePrev + angleNext) / 2f);
+
+            float anglePrev = perAnchorNormalsAngle[(newAnchorAngleIndex - 1)];
+            float angleNext = perAnchorNormalsAngle[newAnchorAngleIndex];
+            float splitAngle = Mathf.LerpAngle(anglePrev,angleNext,splitTime);
+            perAnchorNormalsAngle.Insert(newAnchorAngleIndex, splitAngle);
 
             NotifyPathModified();
         }
