@@ -1,0 +1,14 @@
+{
+    "name": "com.seblague.pathcreator",
+    "displayName": "Path Creator",
+    "version": "1.0.0",
+    "unity": "2018.3",
+    "description": "Path creation asset for Unity game development.",
+    "category": "Unity",
+    "keywords": [
+        "spline",
+        "path"
+    ],
+    "dependencies": {
+    }
+}
