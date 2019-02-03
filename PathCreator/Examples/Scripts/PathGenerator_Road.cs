@@ -30,7 +30,6 @@ public class PathGenerator_Road : MonoBehaviour
     public PhysicsMaterial2D physicsMaterial2D;
     public Material material;
 
-    public float minDistanceSpriteShapeVerts = 0.5f;
     private Vector3 lastVert;
 
     public List<Vector2> pathPoints;
