@@ -24,7 +24,7 @@ namespace PathCreation
         #region Fields
 
         [SerializeField, HideInInspector]
-        List<Vector3> points;
+        public List<Vector3> points;
         [SerializeField, HideInInspector]
         bool isClosed;
         [SerializeField, HideInInspector]
@@ -89,7 +89,6 @@ namespace PathCreation
         public BezierPath(IEnumerable<Vector3> points, bool isClosed = false, PathSpace space = PathSpace.xyz)
         {
             Vector3[] pointsArray = points.ToArray();
-
             if (pointsArray.Length < 2)
             {
                 Debug.LogError("Path requires at least 2 anchor points.");
@@ -786,7 +785,7 @@ namespace PathCreation
                 if (controlIndex >= 0 && controlIndex < points.Count || isClosed)
                 {
                     points[LoopIndex(controlIndex)] = anchorPos + dir * neighbourDistances[i] * autoControlLength;
-                }
+                    }
             }
         }
 

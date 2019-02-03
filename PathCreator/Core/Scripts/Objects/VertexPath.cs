@@ -264,6 +264,12 @@ namespace PathCreation
             return times[index];
             }
 
+        /// Gets forward direction on path by index.
+        public Vector3 GetDirection(int index, EndOfPathInstruction endOfPathInstruction = EndOfPathInstruction.Loop)
+            {
+            return tangents[index];
+            }
+
         #endregion
 
         #region Internal methods

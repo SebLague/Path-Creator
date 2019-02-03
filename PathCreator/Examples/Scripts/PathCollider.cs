@@ -7,14 +7,15 @@ public class PathCollider : MonoBehaviour
     public PathCreator pathCreator;
     public EdgeCollider2D edge;
     public PhysicsMaterial2D physicsMat;
-
+    public bool generateOnStart = false;
     void Start()
         {
         pathCreator = GetComponent<PathCreator>();
-        GenerateCollider();
+        if (generateOnStart)
+            GenerateCollider();
         }
 
-    private void GenerateCollider()
+    public void GenerateCollider()
         {
         if (pathCreator != null)
             {
@@ -30,5 +31,10 @@ public class PathCollider : MonoBehaviour
             edge.points = verts2D;
             edge.sharedMaterial = physicsMat;
             }
+        }
+
+    public void SetPhysicsMaterial(PhysicsMaterial2D mat)
+        {
+        physicsMat = mat;
         }
     }
