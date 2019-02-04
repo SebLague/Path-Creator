@@ -29,7 +29,6 @@ namespace PathCreation.Utility
                 float estimatedSegmentLength = CubicBezierUtility.EstimateCurveLength(segmentPoints[0], segmentPoints[1], segmentPoints[2], segmentPoints[3]);
                 int divisions = Mathf.CeilToInt(estimatedSegmentLength * accuracy);
                 float increment = 1f / divisions;
-
                 for (float t = increment; t <= 1; t += increment)
                 {
                     bool isLastPointOnPath = (t + increment > 1 && segmentIndex == bezierPath.NumSegments - 1);
@@ -65,8 +64,12 @@ namespace PathCreation.Utility
                     prevPointOnPath = pointOnPath;
                 }
                 splitData.anchorVertexMap.Add(splitData.vertices.Count - 1);
-            }
-			return splitData;
+                ///////
+                splitData.anchorTangents.Add(CubicBezierUtility.EvaluateCurveDerivative(segmentPoints, 0));
+                splitData.anchorTangents.Add(CubicBezierUtility.EvaluateCurveDerivative(segmentPoints, 1));
+                ///////
+                }
+            return splitData;
 		}
 
 		public static PathSplitData SplitBezierPathEvenly(BezierPath bezierPath, float spacing, float accuracy)
@@ -123,8 +126,8 @@ namespace PathCreation.Utility
                     prevPointOnPath = pointOnPath;
                 }
                 splitData.anchorVertexMap.Add(splitData.vertices.Count - 1);
-            }
-			return splitData;
+                }
+            return splitData;
 		}
 
        
@@ -134,6 +137,7 @@ namespace PathCreation.Utility
 		   public List<float> cumulativeLength = new List<float>();
 		   public List<int> anchorVertexMap = new List<int>();
 		   public MinMax3D minMax = new MinMax3D();
+            public List<Vector3> anchorTangents = new List<Vector3>();
 	   }
     }
 }

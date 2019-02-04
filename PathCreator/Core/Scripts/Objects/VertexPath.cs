@@ -21,6 +21,7 @@ namespace PathCreation
         public readonly Vector3[] vertices;
         public readonly Vector3[] tangents;
         public readonly Vector3[] normals;
+        public readonly Vector3[] anchorTangents;
 
         /// Percentage along the path at each vertex (0 being start of path, and 1 being the end)
         public readonly float[] times;
@@ -70,7 +71,7 @@ namespace PathCreation
             cumulativeLengthAtEachVertex = new float[numVerts];
             times = new float[numVerts];
             bounds = new Bounds((pathSplitData.minMax.Min + pathSplitData.minMax.Max) / 2, pathSplitData.minMax.Max - pathSplitData.minMax.Min);
-
+            anchorTangents = pathSplitData.anchorTangents.ToArray();
             // Figure out up direction for path
             up = (bounds.size.z > bounds.size.y) ? Vector3.up : -Vector3.forward;
             Vector3 lastRotationAxis = up;
@@ -251,6 +252,14 @@ namespace PathCreation
                     }
                 }
             return index;
+            }
+
+        /// <summary>
+        /// Returns the position of the nearest vertex
+        /// </summary>
+        public Vector3 GetNearestVertexPosition(Vector3 position)
+            {
+            return vertices[GetNearestVertex(position)];
             }
 
         /// <summary>

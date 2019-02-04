@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 using PathCreation;
-
+using System;
 
 public static class PathToSpriteShape
 {
-    const float SCALE = 4.25f;
+    const float SCALE = 0.3f;//4.25f;
 
     /// <summary>
     /// Updates a sprite shape.
@@ -22,7 +22,7 @@ public static class PathToSpriteShape
         int numSegments = pathCreator.bezierPath.NumSegments;
         int index = spline.GetPointCount();
         Vector3[] segment;
-        if(index == 2)
+        if(index == 2 || index == 0)
             {
             spline.Clear();
             index = 0;
@@ -34,55 +34,50 @@ public static class PathToSpriteShape
             }
         for (int i = j + 1; i < numSegments; i++)
             {
-            segment = pathCreator.bezierPath.GetPointsInSegment(i);
-            InsertPointBezier(spline, segment[3], index);
-            index++;
-            j = i;
+            if(!(i==numSegments-1 && !spline.isOpenEnded))
+                {
+                segment = pathCreator.bezierPath.GetPointsInSegment(i);
+                InsertPointBezier(spline, segment[3], index);
+                index++;
+                j = i;
+                }
             }
 
-        for (int i = 1; i < spline.GetPointCount() - 1; i++)
+        /*for (int i = 1; i < spline.GetPointCount() - 1; i++) // OLD WAY TO CALCULATE TANGENTS, NOT AS ACCURATE
             {
             Vector3 leftTangent, rightTangent;
             SplineUtility.CalculateTangents(spline.GetPosition(i), spline.GetPosition(i - 1), spline.GetPosition(i + 1), Vector2.right, SCALE, out rightTangent, out leftTangent);
             spline.SetTangentMode(i, ShapeTangentMode.Continuous);
             spline.SetLeftTangent(i, leftTangent);
             spline.SetRightTangent(i, rightTangent);
-            }
+            }*/
 
-            
+        spline.SetTangentMode(0, ShapeTangentMode.Continuous);
+        spline.SetRightTangent(0, pathCreator.path.anchorTangents[0]* SCALE);
+
+        int anchorT = 1;
+        for (int i = 1; i < spline.GetPointCount() - 1; i++)
+            {
+            //Debug.Log("Spline count: " + spline.GetPointCount() + ", tangent normal count: " + pathCreator.path.anchorTangents.Length);
+            spline.SetTangentMode(i, ShapeTangentMode.Continuous);
+            spline.SetLeftTangent(i, -pathCreator.path.anchorTangents[anchorT]* SCALE);
+            anchorT++;
+            spline.SetRightTangent(i, pathCreator.path.anchorTangents[anchorT]* SCALE);
+            anchorT++;
+
+            }
+        spline.SetLeftTangent(spline.GetPointCount() - 1, -pathCreator.path.anchorTangents[pathCreator.path.anchorTangents.Length - 1] * SCALE);
+        if (!spline.isOpenEnded)
+            {
+            spline.SetLeftTangent(0, -pathCreator.path.anchorTangents[0] * SCALE);
+            spline.SetRightTangent(spline.GetPointCount() - 1, pathCreator.path.anchorTangents[pathCreator.path.anchorTangents.Length - 1] * SCALE);
+            }
         return j;
         }
 
-
-
-    /// <summary>
-    /// Generates a sprite shape from the path. BUGGY when updating the spriteshape later on with UpdateSpriteShape, misses the first point. Just use UpdateSpriteShape.
-    /// </summary>
-    /// <param name="controller">Sprite Shape Controller</param>
-    /// <param name="pathCreator">Path Creator</param>
-    public static void GenerateSpriteShape(SpriteShapeController controller, PathCreator pathCreator, out int j)
+    internal static void Clear(SpriteShapeController spriteShapeController)
         {
-        Spline spline = controller.spline;
-        spline.Clear();
-        spline.isOpenEnded = !pathCreator.path.isClosedLoop;
-        int segments = pathCreator.bezierPath.NumSegments;
-        int index = spline.GetPointCount();
-        Vector3[] segment = pathCreator.bezierPath.GetPointsInSegment(0);
-        InsertPointBezier(spline, segment[0], index);
-        index++;
-        for (j = 1; j < segments; j++)
-            {
-            segment = pathCreator.bezierPath.GetPointsInSegment(j);
-            InsertPointBezier(spline, segment[3], index);
-            index++;
-            }
-        for (int i = 1; i < spline.GetPointCount() - 1; i++)
-            {
-            Vector3 leftTangent, rightTangent;
-            SplineUtility.CalculateTangents(spline.GetPosition(i), spline.GetPosition(i - 1), spline.GetPosition(i + 1), Vector2.right, SCALE, out rightTangent, out leftTangent);
-            spline.SetLeftTangent(i, leftTangent);
-            spline.SetRightTangent(i, rightTangent);
-            }
+        spriteShapeController.spline.Clear(); 
         }
 
     public static void RemovePoints()
