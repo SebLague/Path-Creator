@@ -7,7 +7,7 @@ using System;
 
 public static class PathToSpriteShape
 {
-    const float SCALE = 0.3f;//4.25f;
+    const float SCALE = 0.35f;//4.25f;
 
     /// <summary>
     /// Updates a sprite shape.
@@ -70,7 +70,9 @@ public static class PathToSpriteShape
         if (!spline.isOpenEnded)
             {
             spline.SetLeftTangent(0, -pathCreator.path.anchorTangents[0] * SCALE);
+            spline.SetTangentMode(0, ShapeTangentMode.Continuous);
             spline.SetRightTangent(spline.GetPointCount() - 1, pathCreator.path.anchorTangents[pathCreator.path.anchorTangents.Length - 1] * SCALE);
+            spline.SetTangentMode(spline.GetPointCount() - 1, ShapeTangentMode.Continuous);
             }
         return j;
         }
