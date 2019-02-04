@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using PathCreation;
 using UnityEngine.U2D;
 
+/// Uses Odin Inspector, simply calls functions from the PathToSpriteShape class via a button in the editor.
 [RequireComponent(typeof(PathCreator))]
 [RequireComponent(typeof(SpriteShapeController))]
 public class ConvertToSpriteShape : MonoBehaviour
