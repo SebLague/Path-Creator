@@ -49,6 +49,7 @@ namespace PathCreationEditor
         int selectedSegmentIndex;
         int draggingHandleIndex;
         int mouseOverHandleIndex;
+		int selectionIndex;
         int handleIndexToDisplayAsTransform;
 
         bool shiftLastFrame;
@@ -138,7 +139,6 @@ namespace PathCreationEditor
                     GUILayout.Space(inspectorSectionSpacing);
                 }
 
-
                 data.showNormals = EditorGUILayout.Foldout(data.showNormals, new GUIContent("Normals Options"), true, boldFoldoutStyle);
                 if (data.showNormals)
                 {
@@ -173,7 +173,35 @@ namespace PathCreationEditor
                     DrawGlobalDisplaySettingsInspector();
                 }
 
-                if (check.changed)
+				if (selectionIndex >= 0)
+				{
+					EditorGUILayout.Space ();
+					EditorGUILayout.LabelField ("Selected Point");
+
+					using (new EditorGUI.IndentLevelScope ())
+					{
+						var currentPosition = creator.bezierPath[selectionIndex];
+						var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
+						if (newPosition != currentPosition)
+						{
+							Undo.RecordObject (creator, "Move point");
+							creator.bezierPath.MovePoint (selectionIndex, newPosition);
+						}
+						if (selectionIndex % 3 == 0)
+						{
+							var anchorIndex = selectionIndex / 3;
+							var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
+							var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
+							if (newAngle != currentAngle)
+							{
+								Undo.RecordObject (creator, "Set Angle");
+								creator.bezierPath.SetAnchorNormalAngle (anchorIndex, newAngle);
+							}
+						}
+					}
+				}
+
+				if (check.changed)
                 {
                     SceneView.RepaintAll();
 					EditorApplication.QueuePlayerLoopUpdate ();
@@ -382,7 +410,7 @@ namespace PathCreationEditor
                         handleIndexToDisplayAsTransform = -1;
                     }
                     mouseOverHandleIndex = -1;
-
+					Repaint ();
                 }
             }
 
@@ -624,12 +652,15 @@ namespace PathCreationEditor
             {
                 case PathHandle.HandleInputType.LMBDrag:
                     draggingHandleIndex = i;
-                    handleIndexToDisplayAsTransform = -1;
-                    break;
+					selectionIndex = i;
+					handleIndexToDisplayAsTransform = -1;
+					Repaint ();
+					break;
                 case PathHandle.HandleInputType.LMBRelease:
                     draggingHandleIndex = -1;
                     handleIndexToDisplayAsTransform = -1;
-                    break;
+					Repaint ();
+					break;
                 case PathHandle.HandleInputType.LMBClick:
                     if (Event.current.shift)
                     {
@@ -640,18 +671,22 @@ namespace PathCreationEditor
                         if (handleIndexToDisplayAsTransform == i)
                         {
                             handleIndexToDisplayAsTransform = -1; // disable move tool if clicking on point under move tool
-                        }
+							selectionIndex = -1;
+						}
                         else
                         {
                             handleIndexToDisplayAsTransform = i;
-                        }
+							selectionIndex = i;
+						}
                     }
-                    break;
+					Repaint ();
+					break;
                 case PathHandle.HandleInputType.LMBPress:
                     if (handleIndexToDisplayAsTransform != i)
                     {
                         handleIndexToDisplayAsTransform = -1;
-                    }
+						Repaint ();
+					}
                     break;
             }
 
@@ -749,6 +784,7 @@ namespace PathCreationEditor
             draggingHandleIndex = -1;
             mouseOverHandleIndex = -1;
             handleIndexToDisplayAsTransform = -1;
+			selectionIndex = -1;
             hasUpdatedScreenSpaceLine = false;
             hasUpdatedNormalsVertexPath = false;
             bezierPath.Pivot = bezierPath.PathBounds.center;
