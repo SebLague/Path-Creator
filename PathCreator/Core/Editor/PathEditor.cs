@@ -112,7 +112,6 @@ namespace PathCreationEditor
 
         void DrawBezierPathInspector()
         {
-
             using (var check = new EditorGUI.ChangeCheckScope())
             {
                 // Path options:
@@ -177,6 +176,7 @@ namespace PathCreationEditor
                 if (check.changed)
                 {
                     SceneView.RepaintAll();
+					EditorApplication.QueuePlayerLoopUpdate ();
                 }
             }
         }
@@ -196,7 +196,8 @@ namespace PathCreationEditor
                     {
                         data.VertexPathSettingsChanged();
                         SceneView.RepaintAll();
-                    }
+						EditorApplication.QueuePlayerLoopUpdate ();
+					}
                 }
             }
 
@@ -211,6 +212,7 @@ namespace PathCreationEditor
                     if (check.changed)
                     {
                         SceneView.RepaintAll();
+						EditorApplication.QueuePlayerLoopUpdate ();
                     }
                 }
                 DrawGlobalDisplaySettingsInspector();
@@ -231,7 +233,7 @@ namespace PathCreationEditor
                 {
                     UpdateGlobalDisplaySettings();
                     SceneView.RepaintAll();
-                }
+				}
             }
         }
 
@@ -241,25 +243,33 @@ namespace PathCreationEditor
 
         void OnSceneGUI()
         {
-            handlesStartCol = Handles.color;
-            switch (data.tabIndex)
-            {
-                case bezierPathTab:
-                    ProcessBezierPathInput(Event.current);
-                    DrawBezierPathSceneEditor();
-                    break;
-                case vertexPathTab:
-                    DrawVertexPathSceneEditor();
-                    break;
-            }
+			using (var check = new EditorGUI.ChangeCheckScope ())
+			{
+				handlesStartCol = Handles.color;
+				switch (data.tabIndex)
+				{
+					case bezierPathTab:
+						ProcessBezierPathInput (Event.current);
+						DrawBezierPathSceneEditor ();
+						break;
+					case vertexPathTab:
+						DrawVertexPathSceneEditor ();
+						break;
+				}
 
 
-            // Don't allow clicking over empty space to deselect the object
-            if (Event.current.type == EventType.Layout)
-            {
-                HandleUtility.AddDefaultControl(0);
-            }
-        }
+				// Don't allow clicking over empty space to deselect the object
+				if (Event.current.type == EventType.Layout)
+				{
+					HandleUtility.AddDefaultControl (0);
+				}
+
+				if (check.changed)
+				{
+					EditorApplication.QueuePlayerLoopUpdate ();
+				}
+			}
+		}
 
         void DrawVertexPathSceneEditor()
         {
