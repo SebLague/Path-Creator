@@ -290,7 +290,7 @@ namespace PathCreation
             return new TimeOnPathData(prevIndex, nextIndex, abPercent);
         }
 
-        struct TimeOnPathData
+        public struct TimeOnPathData
         {
             public readonly int previousIndex;
             public readonly int nextIndex;
