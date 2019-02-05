@@ -279,6 +279,11 @@ namespace PathCreation
             return tangents[index];
             }
 
+        public float GetUniformSpeed(float speed)
+            {
+            return (1 / length) * speed;
+            }
+
         #endregion
 
         #region Internal methods
