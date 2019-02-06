@@ -49,7 +49,7 @@ namespace PathCreationEditor
         int selectedSegmentIndex;
         int draggingHandleIndex;
         int mouseOverHandleIndex;
-		int selectionIndex;
+		int drawInspectorGUIIndex;
         int handleIndexToDisplayAsTransform;
 
         bool shiftLastFrame;
@@ -130,26 +130,26 @@ namespace PathCreationEditor
                     data.pathTransformationEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Transforms"), data.pathTransformationEnabled);
 
 					// If a point has been selected
-					if (selectionIndex >= 0)
+					if (drawInspectorGUIIndex >= 0 && drawInspectorGUIIndex < bezierPath.NumPoints)
 					{
 						EditorGUILayout.LabelField ("Selected Point");
 
 						using (new EditorGUI.IndentLevelScope ())
 						{
-							var currentPosition = creator.bezierPath[selectionIndex];
+							var currentPosition = creator.bezierPath[drawInspectorGUIIndex];
 							var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
 							if (newPosition != currentPosition)
 							{
 								Undo.RecordObject (creator, "Move point");
-								creator.bezierPath.MovePoint (selectionIndex, newPosition);
+								creator.bezierPath.MovePoint (drawInspectorGUIIndex, newPosition);
 							}
 							// Don't draw the angle field if we aren't selecting an anchor point.
-							if (selectionIndex % 3 == 0)
+							if (drawInspectorGUIIndex % 3 == 0)
 							{
 								// Disable the angle field if the path's space isn't 3D b/c the angle will be ignored.
 								using (new EditorGUI.DisabledScope (creator.bezierPath.Space != PathSpace.xyz))
 								{
-									var anchorIndex = selectionIndex / 3;
+									var anchorIndex = drawInspectorGUIIndex / 3;
 									var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
 									var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
 									if (newAngle != currentAngle)
@@ -658,7 +658,7 @@ namespace PathCreationEditor
             {
                 case PathHandle.HandleInputType.LMBDrag:
                     draggingHandleIndex = i;
-					selectionIndex = i;
+					drawInspectorGUIIndex = i;
 					handleIndexToDisplayAsTransform = -1;
 					Repaint ();
 					break;
@@ -677,12 +677,12 @@ namespace PathCreationEditor
                         if (handleIndexToDisplayAsTransform == i)
                         {
                             handleIndexToDisplayAsTransform = -1; // disable move tool if clicking on point under move tool
-							selectionIndex = -1;
+							drawInspectorGUIIndex = -1;
 						}
                         else
                         {
                             handleIndexToDisplayAsTransform = i;
-							selectionIndex = i;
+							drawInspectorGUIIndex = i;
 						}
                     }
 					Repaint ();
@@ -834,7 +834,7 @@ namespace PathCreationEditor
             draggingHandleIndex = -1;
             mouseOverHandleIndex = -1;
             handleIndexToDisplayAsTransform = -1;
-			selectionIndex = -1;
+			drawInspectorGUIIndex = -1;
             hasUpdatedScreenSpaceLine = false;
             hasUpdatedNormalsVertexPath = false;
             bezierPath.Pivot = bezierPath.PathBounds.center;
