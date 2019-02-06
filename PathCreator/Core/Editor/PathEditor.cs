@@ -129,7 +129,37 @@ namespace PathCreationEditor
                     bezierPath.IsClosed = EditorGUILayout.Toggle("Closed Path", bezierPath.IsClosed);
                     data.pathTransformationEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Transforms"), data.pathTransformationEnabled);
 
-                    if (GUILayout.Button("Reset Path"))
+					if (selectionIndex >= 0)
+					{
+						EditorGUILayout.LabelField ("Selected Point");
+
+						using (new EditorGUI.IndentLevelScope ())
+						{
+							var currentPosition = creator.bezierPath[selectionIndex];
+							var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
+							if (newPosition != currentPosition)
+							{
+								Undo.RecordObject (creator, "Move point");
+								creator.bezierPath.MovePoint (selectionIndex, newPosition);
+							}
+							using (new EditorGUI.DisabledScope (creator.bezierPath.Space != PathSpace.xyz))
+							{
+								if (selectionIndex % 3 == 0)
+								{
+									var anchorIndex = selectionIndex / 3;
+									var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
+									var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
+									if (newAngle != currentAngle)
+									{
+										Undo.RecordObject (creator, "Set Angle");
+										creator.bezierPath.SetAnchorNormalAngle (anchorIndex, newAngle);
+									}
+								}
+							}
+						}
+					}
+
+					if (GUILayout.Button("Reset Path"))
                     {
                         Undo.RecordObject(creator, "Reset Path");
                         bool in2DEditorMode = EditorSettings.defaultBehaviorMode == EditorBehaviorMode.Mode2D;
@@ -138,7 +168,7 @@ namespace PathCreationEditor
 					}
 
                     GUILayout.Space(inspectorSectionSpacing);
-                }
+				}
 
                 data.showNormals = EditorGUILayout.Foldout(data.showNormals, new GUIContent("Normals Options"), true, boldFoldoutStyle);
                 if (data.showNormals)
@@ -173,34 +203,6 @@ namespace PathCreationEditor
                     data.bezierHandleScale = Mathf.Max(0, EditorGUILayout.FloatField(new GUIContent("Handle Scale"), data.bezierHandleScale));
                     DrawGlobalDisplaySettingsInspector();
                 }
-
-				if (selectionIndex >= 0)
-				{
-					EditorGUILayout.Space ();
-					EditorGUILayout.LabelField ("Selected Point");
-
-					using (new EditorGUI.IndentLevelScope ())
-					{
-						var currentPosition = creator.bezierPath[selectionIndex];
-						var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
-						if (newPosition != currentPosition)
-						{
-							Undo.RecordObject (creator, "Move point");
-							creator.bezierPath.MovePoint (selectionIndex, newPosition);
-						}
-						if (selectionIndex % 3 == 0)
-						{
-							var anchorIndex = selectionIndex / 3;
-							var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
-							var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
-							if (newAngle != currentAngle)
-							{
-								Undo.RecordObject (creator, "Set Angle");
-								creator.bezierPath.SetAnchorNormalAngle (anchorIndex, newAngle);
-							}
-						}
-					}
-				}
 
 				if (check.changed)
                 {
