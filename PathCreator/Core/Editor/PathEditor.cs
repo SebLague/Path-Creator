@@ -705,29 +705,43 @@ namespace PathCreationEditor
 				// If the use is holding alt, try and mirror the control point.
 				if (Event.current.modifiers == EventModifiers.Alt)
 				{
-					// If the control point we're selecting isn't at the beginning or end of the path
-					if (i > 1 && i < bezierPath.NumPoints - 2)
-					{
-						// 0 = Anchor, 1 = Left Control, 2 = Right Control
-						var pointType = i % 3;
+					// 0 = Anchor, 1 = Left Control, 2 = Right Control
+					var pointType = i % 3;
 
-						// If we are selecting a control point
-						if (pointType != 0)
+					// If we are selecting a control point
+					if (pointType != 0)
+					{
+						// If we are selecting the left control point
+						if (pointType == 2)
 						{
-							// If we are selecting the left control point
-							if (pointType == 2)
-							{
-								var anchorIndex = i + 1;
-								var anchorPoint = bezierPath[anchorIndex];
-								bezierPath.MovePoint (anchorIndex + 1, anchorPoint - (handlePosition - anchorPoint));
-							}
-							// If we are selecting the right control point
-							else if (pointType == 1)
-							{
-								var anchorIndex = i - 1;
-								var anchorPoint = bezierPath[anchorIndex];
-								bezierPath.MovePoint (anchorIndex - 1, anchorPoint - (handlePosition - anchorPoint));
-							}
+							// If the path doesn't loop and the user is selecting the last control point there isn't a control point to mirror
+							if (i < bezierPath.NumPoints - 2 && !bezierPath.IsClosed)
+								return;
+							// Get the index of this control's anchor.
+							var anchorIndex = (i + 1) % bezierPath.NumPoints;
+							var anchorPoint = bezierPath[anchorIndex];
+							// Get the index of the anchors other control.
+							// We don't have to loop this index b/c if it's the last control, it's anchors index will be 1.
+							var otherControlPointIndex = anchorIndex + 1;
+							// Move the other control point to the opposite of the selected control point's position relative to it's anchor.
+							bezierPath.MovePoint (otherControlPointIndex, anchorPoint - (handlePosition - anchorPoint));
+						}
+						// If we are selecting the right control point
+						else if (pointType == 1)
+						{
+							// If the path doesn't loop and the user is selecting the first control point there isn't a control point to mirror.
+							if (i > 1 && !bezierPath.IsClosed)
+								return;
+							// Get the index of this control's anchor.
+							var anchorIndex = i - 1;
+							var anchorPoint = bezierPath[anchorIndex];
+							// Get the index of the anchors other control.
+							var otherControlPointIndex = anchorIndex - 1;
+							// Make sure to loop this index back around if it is < 1.
+							if (otherControlPointIndex < 0)
+								otherControlPointIndex = bezierPath.NumPoints - Mathf.Abs (otherControlPointIndex);
+							// Move the other control point to the opposite of the selected control point's position relative to it's anchor.
+							bezierPath.MovePoint (otherControlPointIndex, anchorPoint - (handlePosition - anchorPoint));
 						}
 					}
 				}
