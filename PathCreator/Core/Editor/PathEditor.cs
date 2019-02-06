@@ -696,7 +696,37 @@ namespace PathCreationEditor
             {
                 Undo.RecordObject(creator, "Move point");
                 bezierPath.MovePoint(i, handlePosition);
-            }
+
+				// If the use is holding alt, try and mirror the control point.
+				if (Event.current.modifiers == EventModifiers.Alt)
+				{
+					// If the control point we're selecting isn't at the beginning or end of the path
+					if (i > 1 && i < bezierPath.NumPoints - 2)
+					{
+						// 0 = Anchor, 1 = Left Control, 2 = Right Control
+						var pointType = i % 3;
+
+						// If we are selecting a control point
+						if (pointType != 0)
+						{
+							// If we are selecting the left control point
+							if (pointType == 2)
+							{
+								var anchorIndex = i + 1;
+								var anchorPoint = bezierPath[anchorIndex];
+								bezierPath.MovePoint (anchorIndex + 1, anchorPoint - (handlePosition - anchorPoint));
+							}
+							// If we are selecting the right control point
+							else if (pointType == 1)
+							{
+								var anchorIndex = i - 1;
+								var anchorPoint = bezierPath[anchorIndex];
+								bezierPath.MovePoint (anchorIndex - 1, anchorPoint - (handlePosition - anchorPoint));
+							}
+						}
+					}
+				}
+			}
 
         }
 
