@@ -129,6 +129,7 @@ namespace PathCreationEditor
                     bezierPath.IsClosed = EditorGUILayout.Toggle("Closed Path", bezierPath.IsClosed);
                     data.pathTransformationEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Transforms"), data.pathTransformationEnabled);
 
+					// If a point has been selected
 					if (selectionIndex >= 0)
 					{
 						EditorGUILayout.LabelField ("Selected Point");
@@ -142,9 +143,11 @@ namespace PathCreationEditor
 								Undo.RecordObject (creator, "Move point");
 								creator.bezierPath.MovePoint (selectionIndex, newPosition);
 							}
-							using (new EditorGUI.DisabledScope (creator.bezierPath.Space != PathSpace.xyz))
+							// Don't draw the angle field if we aren't selecting an anchor point.
+							if (selectionIndex % 3 == 0)
 							{
-								if (selectionIndex % 3 == 0)
+								// Disable the angle field if the path's space isn't 3D b/c the angle will be ignored.
+								using (new EditorGUI.DisabledScope (creator.bezierPath.Space != PathSpace.xyz))
 								{
 									var anchorIndex = selectionIndex / 3;
 									var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
