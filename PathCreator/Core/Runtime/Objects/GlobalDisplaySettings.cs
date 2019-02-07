@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
-namespace PathCreationEditor
+namespace PathCreation
 {
     //[CreateAssetMenu()]
     public class GlobalDisplaySettings : ScriptableObject
@@ -53,8 +52,7 @@ namespace PathCreationEditor
 
 #if UNITY_EDITOR
         public static GlobalDisplaySettings Load() {
-            // Global display settings:
-            string[] guids = AssetDatabase.FindAssets("t:GlobalDisplaySettings");
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:GlobalDisplaySettings");
             if (guids.Length == 0)
             {
                 Debug.LogWarning("Could not find DisplaySettings asset. Will use default settings instead.");
@@ -62,8 +60,8 @@ namespace PathCreationEditor
             }
             else
             {
-                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                return AssetDatabase.LoadAssetAtPath<GlobalDisplaySettings>(path);
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                return UnityEditor.AssetDatabase.LoadAssetAtPath<GlobalDisplaySettings>(path);
             }
         }
 #endif

@@ -14,7 +14,7 @@ namespace PathCreation {
         [SerializeField, HideInInspector]
         bool initialized;
 
-        PathCreationEditor.GlobalDisplaySettings globalEditorDisplaySettings;
+        GlobalDisplaySettings globalEditorDisplaySettings;
 
         // Vertex path created from the current bezier path
         public VertexPath path {
@@ -77,7 +77,7 @@ namespace PathCreation {
             if (path != null) {
 
                 if (globalEditorDisplaySettings == null) {
-                    globalEditorDisplaySettings = PathCreationEditor.GlobalDisplaySettings.Load ();
+                    globalEditorDisplaySettings = GlobalDisplaySettings.Load ();
                 }
 
                 if (globalEditorDisplaySettings.alwaysDrawPath) {
