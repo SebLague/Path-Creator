@@ -698,21 +698,11 @@ namespace PathCreationEditor
             RepaintUnfocusedSceneViews();
         }
 
+        
 
         void LoadDisplaySettings()
         {
-            // Global display settings:
-            string[] guids = AssetDatabase.FindAssets("t:GlobalDisplaySettings");
-            if (guids.Length == 0)
-            {
-                Debug.LogWarning("Could not find DisplaySettings asset. Will use default settings instead.");
-                globalDisplaySettings = ScriptableObject.CreateInstance<GlobalDisplaySettings>();
-            }
-            else
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                globalDisplaySettings = AssetDatabase.LoadAssetAtPath<GlobalDisplaySettings>(path);
-            }
+            globalDisplaySettings = GlobalDisplaySettings.Load();
 
             capFunctions = new Dictionary<GlobalDisplaySettings.HandleType, Handles.CapFunction>();
             capFunctions.Add(GlobalDisplaySettings.HandleType.Circle, Handles.CylinderHandleCap);

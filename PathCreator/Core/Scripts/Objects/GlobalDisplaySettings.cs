@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace PathCreationEditor
 {
@@ -11,9 +12,12 @@ namespace PathCreationEditor
         public enum HandleType { Sphere, Circle, Square };
 
         [Header("Appearance")]
+        
         public float anchorSize = 10;
         public float controlSize = 7f;
         
+        [Tooltip("Should the path be drawn even when the path object is not selected?")]
+        public bool alwaysDrawPath = true;
         [Tooltip("If true, control points will be hidden when the control point mode is set to automatic. Otherwise they will inactive, but still visible.")]
         public bool hideAutoControls = true;
         public HandleType anchorShape;
@@ -46,5 +50,23 @@ namespace PathCreationEditor
         public Color normals = Color.yellow;
         [Range(0,1)]
         public float normalsLength = .1f;
+
+#if UNITY_EDITOR
+        public static GlobalDisplaySettings Load() {
+            // Global display settings:
+            string[] guids = AssetDatabase.FindAssets("t:GlobalDisplaySettings");
+            if (guids.Length == 0)
+            {
+                Debug.LogWarning("Could not find DisplaySettings asset. Will use default settings instead.");
+                return ScriptableObject.CreateInstance<GlobalDisplaySettings>();
+            }
+            else
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                return AssetDatabase.LoadAssetAtPath<GlobalDisplaySettings>(path);
+            }
+        }
+#endif
+
     }
 }
