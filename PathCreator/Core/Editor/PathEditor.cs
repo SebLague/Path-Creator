@@ -49,6 +49,7 @@ namespace PathCreationEditor
         int selectedSegmentIndex;
         int draggingHandleIndex;
         int mouseOverHandleIndex;
+		int drawInspectorGUIIndex;
         int handleIndexToDisplayAsTransform;
 
         bool shiftLastFrame;
@@ -112,7 +113,6 @@ namespace PathCreationEditor
 
         void DrawBezierPathInspector()
         {
-
             using (var check = new EditorGUI.ChangeCheckScope())
             {
                 // Path options:
@@ -129,16 +129,49 @@ namespace PathCreationEditor
                     bezierPath.IsClosed = EditorGUILayout.Toggle("Closed Path", bezierPath.IsClosed);
                     data.pathTransformationEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Transforms"), data.pathTransformationEnabled);
 
-                    if (GUILayout.Button("Reset Path"))
+					// If a point has been selected
+					if (drawInspectorGUIIndex >= 0 && drawInspectorGUIIndex < bezierPath.NumPoints)
+					{
+						EditorGUILayout.LabelField ("Selected Point");
+
+						using (new EditorGUI.IndentLevelScope ())
+						{
+							var currentPosition = creator.bezierPath[drawInspectorGUIIndex];
+							var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
+							if (newPosition != currentPosition)
+							{
+								Undo.RecordObject (creator, "Move point");
+								creator.bezierPath.MovePoint (drawInspectorGUIIndex, newPosition);
+							}
+							// Don't draw the angle field if we aren't selecting an anchor point.
+							if (drawInspectorGUIIndex % 3 == 0)
+							{
+								// Disable the angle field if the path's space isn't 3D b/c the angle will be ignored.
+								using (new EditorGUI.DisabledScope (creator.bezierPath.Space != PathSpace.xyz))
+								{
+									var anchorIndex = drawInspectorGUIIndex / 3;
+									var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
+									var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
+									if (newAngle != currentAngle)
+									{
+										Undo.RecordObject (creator, "Set Angle");
+										creator.bezierPath.SetAnchorNormalAngle (anchorIndex, newAngle);
+									}
+								}
+							}
+						}
+					}
+
+					if (GUILayout.Button("Reset Path"))
                     {
                         Undo.RecordObject(creator, "Reset Path");
                         bool in2DEditorMode = EditorSettings.defaultBehaviorMode == EditorBehaviorMode.Mode2D;
                         data.ResetBezierPath(creator.transform.position, in2DEditorMode);
-                    }
+						EditorApplication.QueuePlayerLoopUpdate ();
+					}
 
                     GUILayout.Space(inspectorSectionSpacing);
-                }
-
+				}
 
                 data.showNormals = EditorGUILayout.Foldout(data.showNormals, new GUIContent("Normals Options"), true, boldFoldoutStyle);
                 if (data.showNormals)
@@ -174,9 +207,10 @@ namespace PathCreationEditor
                     DrawGlobalDisplaySettingsInspector();
                 }
 
-                if (check.changed)
+				if (check.changed)
                 {
                     SceneView.RepaintAll();
+					EditorApplication.QueuePlayerLoopUpdate ();
                 }
             }
         }
@@ -196,7 +230,8 @@ namespace PathCreationEditor
                     {
                         data.VertexPathSettingsChanged();
                         SceneView.RepaintAll();
-                    }
+						EditorApplication.QueuePlayerLoopUpdate ();
+					}
                 }
             }
 
@@ -211,6 +246,7 @@ namespace PathCreationEditor
                     if (check.changed)
                     {
                         SceneView.RepaintAll();
+						EditorApplication.QueuePlayerLoopUpdate ();
                     }
                 }
                 DrawGlobalDisplaySettingsInspector();
@@ -231,7 +267,7 @@ namespace PathCreationEditor
                 {
                     UpdateGlobalDisplaySettings();
                     SceneView.RepaintAll();
-                }
+				}
             }
         }
 
@@ -241,25 +277,33 @@ namespace PathCreationEditor
 
         void OnSceneGUI()
         {
-            handlesStartCol = Handles.color;
-            switch (data.tabIndex)
-            {
-                case bezierPathTab:
-                    ProcessBezierPathInput(Event.current);
-                    DrawBezierPathSceneEditor();
-                    break;
-                case vertexPathTab:
-                    DrawVertexPathSceneEditor();
-                    break;
-            }
+			using (var check = new EditorGUI.ChangeCheckScope ())
+			{
+				handlesStartCol = Handles.color;
+				switch (data.tabIndex)
+				{
+					case bezierPathTab:
+						ProcessBezierPathInput (Event.current);
+						DrawBezierPathSceneEditor ();
+						break;
+					case vertexPathTab:
+						DrawVertexPathSceneEditor ();
+						break;
+				}
 
 
-            // Don't allow clicking over empty space to deselect the object
-            if (Event.current.type == EventType.Layout)
-            {
-                HandleUtility.AddDefaultControl(0);
-            }
-        }
+				// Don't allow clicking over empty space to deselect the object
+				if (Event.current.type == EventType.Layout)
+				{
+					HandleUtility.AddDefaultControl (0);
+				}
+
+				if (check.changed)
+				{
+					EditorApplication.QueuePlayerLoopUpdate ();
+				}
+			}
+		}
 
         void DrawVertexPathSceneEditor()
         {
@@ -372,7 +416,7 @@ namespace PathCreationEditor
                         handleIndexToDisplayAsTransform = -1;
                     }
                     mouseOverHandleIndex = -1;
-
+					Repaint ();
                 }
             }
 
@@ -614,12 +658,15 @@ namespace PathCreationEditor
             {
                 case PathHandle.HandleInputType.LMBDrag:
                     draggingHandleIndex = i;
-                    handleIndexToDisplayAsTransform = -1;
-                    break;
+					drawInspectorGUIIndex = i;
+					handleIndexToDisplayAsTransform = -1;
+					Repaint ();
+					break;
                 case PathHandle.HandleInputType.LMBRelease:
                     draggingHandleIndex = -1;
                     handleIndexToDisplayAsTransform = -1;
-                    break;
+					Repaint ();
+					break;
                 case PathHandle.HandleInputType.LMBClick:
                     if (Event.current.shift)
                     {
@@ -630,18 +677,22 @@ namespace PathCreationEditor
                         if (handleIndexToDisplayAsTransform == i)
                         {
                             handleIndexToDisplayAsTransform = -1; // disable move tool if clicking on point under move tool
-                        }
+							drawInspectorGUIIndex = -1;
+						}
                         else
                         {
                             handleIndexToDisplayAsTransform = i;
-                        }
+							drawInspectorGUIIndex = i;
+						}
                     }
-                    break;
+					Repaint ();
+					break;
                 case PathHandle.HandleInputType.LMBPress:
                     if (handleIndexToDisplayAsTransform != i)
                     {
                         handleIndexToDisplayAsTransform = -1;
-                    }
+						Repaint ();
+					}
                     break;
             }
 
@@ -650,7 +701,51 @@ namespace PathCreationEditor
             {
                 Undo.RecordObject(creator, "Move point");
                 bezierPath.MovePoint(i, handlePosition);
-            }
+
+				// If the use is holding alt, try and mirror the control point.
+				if (Event.current.modifiers == EventModifiers.Alt)
+				{
+					// 0 = Anchor, 1 = Left Control, 2 = Right Control
+					var pointType = i % 3;
+
+					// If we are selecting a control point
+					if (pointType != 0)
+					{
+						// If we are selecting the left control point
+						if (pointType == 2)
+						{
+							// If the path doesn't loop and the user is selecting the last control point there isn't a control point to mirror
+							if (i < bezierPath.NumPoints - 2 && !bezierPath.IsClosed)
+								return;
+							// Get the index of this control's anchor.
+							var anchorIndex = (i + 1) % bezierPath.NumPoints;
+							var anchorPoint = bezierPath[anchorIndex];
+							// Get the index of the anchors other control.
+							// We don't have to loop this index b/c if it's the last control, it's anchors index will be 1.
+							var otherControlPointIndex = anchorIndex + 1;
+							// Move the other control point to the opposite of the selected control point's position relative to it's anchor.
+							bezierPath.MovePoint (otherControlPointIndex, anchorPoint - (handlePosition - anchorPoint));
+						}
+						// If we are selecting the right control point
+						else if (pointType == 1)
+						{
+							// If the path doesn't loop and the user is selecting the first control point there isn't a control point to mirror.
+							if (i > 1 && !bezierPath.IsClosed)
+								return;
+							// Get the index of this control's anchor.
+							var anchorIndex = i - 1;
+							var anchorPoint = bezierPath[anchorIndex];
+							// Get the index of the anchors other control.
+							var otherControlPointIndex = anchorIndex - 1;
+							// Make sure to loop this index back around if it is < 1.
+							if (otherControlPointIndex < 0)
+								otherControlPointIndex = bezierPath.NumPoints - Mathf.Abs (otherControlPointIndex);
+							// Move the other control point to the opposite of the selected control point's position relative to it's anchor.
+							bezierPath.MovePoint (otherControlPointIndex, anchorPoint - (handlePosition - anchorPoint));
+						}
+					}
+				}
+			}
 
         }
 
@@ -729,6 +824,7 @@ namespace PathCreationEditor
             draggingHandleIndex = -1;
             mouseOverHandleIndex = -1;
             handleIndexToDisplayAsTransform = -1;
+			drawInspectorGUIIndex = -1;
             hasUpdatedScreenSpaceLine = false;
             hasUpdatedNormalsVertexPath = false;
             bezierPath.Pivot = bezierPath.PathBounds.center;
@@ -737,7 +833,8 @@ namespace PathCreationEditor
             bezierPath.OnModified += OnPathModifed;
 
             SceneView.RepaintAll();
-        }
+			EditorApplication.QueuePlayerLoopUpdate ();
+		}
 
 
         void OnPathModifed()
