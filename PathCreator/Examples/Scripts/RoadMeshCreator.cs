@@ -11,6 +11,7 @@ namespace PathCreation.Examples
         [Range(0, .5f)]
         public float thickness = .15f;
         public bool flattenSurface;
+        public bool meshCollider;
 
         [Header("Material settings")]
         public Material roadMaterial;
@@ -20,16 +21,19 @@ namespace PathCreation.Examples
         MeshFilter meshFilter;
         MeshRenderer meshRenderer;
 
+        string meshHolderName = "Mesh Holder";
+
         protected override void PathUpdated()
         {
             if (pathCreator != null)
             {
                 AssignMeshComponents();
                 AssignMaterials();
-                meshFilter.mesh = CreateRoadMesh();;
+                meshFilter.mesh = CreateRoadMesh();
+                UpdateMeshCollider(meshCollider);
             }
         }
-
+        
 
         Mesh CreateRoadMesh()
         {
@@ -132,7 +136,6 @@ namespace PathCreation.Examples
         void AssignMeshComponents()
         {
             // Find/creator mesh holder object in children
-            string meshHolderName = "Mesh Holder";
             Transform meshHolder = transform.Find(meshHolderName);
             if (meshHolder == null) {
                 meshHolder = new GameObject(meshHolderName).transform;
@@ -165,6 +168,37 @@ namespace PathCreation.Examples
                 meshRenderer.sharedMaterials[0].mainTextureScale = new Vector3(1, textureTiling);
             }
         }
+
+        //update meshcolider if enabled
+        void UpdateMeshCollider(bool meshColliderEnable)
+        {
+            GameObject meshHolder = transform.Find(meshHolderName).gameObject;
+            if (meshHolder != null)
+            {
+                MeshCollider meshCol = meshHolder.GetComponent<MeshCollider>();
+                if (meshCol != null)
+                {
+                    bool convex = meshCol.convex;
+                    bool isTrigger = meshCol.isTrigger;
+                    MeshColliderCookingOptions cookingOptions = meshCol.cookingOptions;
+                    PhysicMaterial material = meshCol.material;
+                    DestroyImmediate(meshCol);
+                    if (meshColliderEnable)
+                    {
+                        meshCol = meshHolder.AddComponent<MeshCollider>();
+                        meshCol.convex = convex;
+                        meshCol.isTrigger = isTrigger;
+                        meshCol.cookingOptions = cookingOptions;
+                        meshCol.material = material;
+                    }
+                }
+                else if (meshColliderEnable)
+                {
+                    meshHolder.AddComponent<MeshCollider>();
+                }
+            }
+        }
+
 
     }
 }
