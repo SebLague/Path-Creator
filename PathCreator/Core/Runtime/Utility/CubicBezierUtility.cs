@@ -23,8 +23,18 @@ namespace PathCreation.Utility
         /// Returns point at time 't' (between 0 and 1)  along bezier curve defined by 4 points (anchor_1, control_1, control_2, anchor_2)
         public static Vector3 EvaluateCurve(Vector3 a1, Vector3 c1, Vector3 c2, Vector3 a2, float t)
         {
-            t = Mathf.Clamp01(t);
-            return (1 - t) * (1 - t) * (1 - t) * a1 + 3 * (1 - t) * (1 - t) * t * c1 + 3 * (1 - t) * t * t * c2 + t * t * t * a2;
+            t = t < 0f ? 0f : t > 1f ? 1f : t;
+
+            float s1 = (1 - t) * (1 - t) * (1 - t);
+            float s2 = 3 * (1 - t) * (1 - t) * t;
+            float s3 = 3 * (1 - t) * t * t;
+            float s4 = t * t * t;
+
+            float x = s1 * a1.x + s2 * c1.x + s3 * c2.x + s4 * a2.x;
+            float y = s1 * a1.y + s2 * c1.y + s3 * c2.y + s4 * a2.y;
+            float z = s1 * a1.z + s2 * c1.z + s3 * c2.z + s4 * a2.z;
+
+            return new Vector3( x, y, z );
         }
 
         /// Returns a vector tangent to the point at time 't'
