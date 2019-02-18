@@ -12,7 +12,7 @@ namespace PathCreation.Utility
         /// Returns point at time 't' (between 0 and 1) along bezier curve defined by 4 points (anchor_1, control_1, control_2, anchor_2)
         public static Vector3 EvaluateCurve(Vector3[] points, float t)
         {
-            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
+            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function (expected 4)");
             if (points.Length >= 4)
             {
                 return EvaluateCurve(points[0], points[1], points[2], points[3], t);
@@ -41,7 +41,7 @@ namespace PathCreation.Utility
         /// This is the vector tangent to the curve at that point
         public static Vector3 EvaluateCurveDerivative(Vector3[] points, float t)
         {
-            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
+            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function (expected 4).");
             if (points.Length >= 4)
             {
                 return EvaluateCurveDerivative(points[0], points[1], points[2], points[3], t);
@@ -69,7 +69,7 @@ namespace PathCreation.Utility
         /// Returns the second derivative of the curve at time 't'
         public static Vector3 EvaluateCurveSecondDerivative(Vector3[] points, float t)
         {
-            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
+            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function (expected 4).");
             if (points.Length >= 4)
             {
                 return EvaluateCurveSecondDerivative(points[0], points[1], points[2], points[3], t);
@@ -96,7 +96,7 @@ namespace PathCreation.Utility
         /// Calculates the normal vector (vector perpendicular to the curve) at specified time
         public static Vector3 Normal(Vector3[] points, float t)
         {
-            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
+            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function (expected 4).");
             if (points.Length >= 4)
             {
                 return Normal(points[0], points[1], points[2], points[3], t);
@@ -115,7 +115,7 @@ namespace PathCreation.Utility
 
         public static Bounds CalculateBounds(Vector3[] points)
         {
-            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
+            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function (expected 4)");
             MinMax3D minMax = new MinMax3D();
             if (points.Length >= 4)
             {
