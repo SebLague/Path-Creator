@@ -53,8 +53,17 @@ namespace PathCreation.Utility
         /// This is the vector tangent to the curve at that point
         public static Vector3 EvaluateCurveDerivative(Vector3 a1, Vector3 c1, Vector3 c2, Vector3 a2, float t)
         {
-            t = Mathf.Clamp01(t);
-            return 3 * (1 - t) * (1 - t) * (c1 - a1) + 6 * (1 - t) * t * (c2 - c1) + 3 * t * t * (a2 - c2);
+            t = t < 0f ? 0f : t > 1f ? 1f : t;
+
+            float s1 = 3 * (1 - t) * (1 - t);
+            float s2 = 6 * (1 - t) * t;
+            float s3 = 3 * t * t;
+
+            float x = s1 * (c1.x - a1.x) + s2 * (c2.x - c1.x) + s3 * (a2.x - c2.x);
+            float y = s1 * (c1.y - a1.y) + s2 * (c2.y - c1.y) + s3 * (a2.y - c2.y);
+            float z = s1 * (c1.z - a1.z) + s2 * (c2.z - c1.z) + s3 * (a2.z - c2.z);
+
+            return new Vector3( x, y, z );
         }
 
         /// Returns the second derivative of the curve at time 't'
@@ -71,8 +80,16 @@ namespace PathCreation.Utility
         ///Returns the second derivative of the curve at time 't'
         public static Vector3 EvaluateCurveSecondDerivative(Vector3 a1, Vector3 c1, Vector3 c2, Vector3 a2, float t)
         {
-            t = Mathf.Clamp01(t);
-            return 6 * (1 - t) * (c2 - 2 * c1 + a1) + 6 * t * (a2 - 2 * c2 + c1);
+            t = t < 0f ? 0f : t > 1f ? 1f : t;
+
+            float s1 = 6 * (1 - t);
+            float s2 = 6 * t;
+
+            float x = s1 * (c2.x - 2 * c1.x + a1.x) + s2 * (a2.x - 2 * c2.x + c1.x);
+            float y = s1 * (c2.y - 2 * c1.y + a1.y) + s2 * (a2.y - 2 * c2.y + c1.y);
+            float z = s1 * (c2.z - 2 * c1.z + a1.z) + s2 * (a2.z - 2 * c2.z + c1.z);
+
+            return new Vector3( x, y, z );
         }
 
 
