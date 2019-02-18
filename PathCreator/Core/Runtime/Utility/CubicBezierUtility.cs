@@ -12,7 +12,7 @@ namespace PathCreation.Utility
         /// Returns point at time 't' (between 0 and 1) along bezier curve defined by 4 points (anchor_1, control_1, control_2, anchor_2)
         public static Vector3 EvaluateCurve(Vector3[] points, float t)
         {
-            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received " + points.Length);
+            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
             if (points.Length >= 4)
             {
                 return EvaluateCurve(points[0], points[1], points[2], points[3], t);
@@ -23,15 +23,25 @@ namespace PathCreation.Utility
         /// Returns point at time 't' (between 0 and 1)  along bezier curve defined by 4 points (anchor_1, control_1, control_2, anchor_2)
         public static Vector3 EvaluateCurve(Vector3 a1, Vector3 c1, Vector3 c2, Vector3 a2, float t)
         {
-            t = Mathf.Clamp01(t);
-            return (1 - t) * (1 - t) * (1 - t) * a1 + 3 * (1 - t) * (1 - t) * t * c1 + 3 * (1 - t) * t * t * c2 + t * t * t * a2;
+            t = t < 0f ? 0f : t > 1f ? 1f : t;
+
+            float s1 = (1 - t) * (1 - t) * (1 - t);
+            float s2 = 3 * (1 - t) * (1 - t) * t;
+            float s3 = 3 * (1 - t) * t * t;
+            float s4 = t * t * t;
+
+            float x = s1 * a1.x + s2 * c1.x + s3 * c2.x + s4 * a2.x;
+            float y = s1 * a1.y + s2 * c1.y + s3 * c2.y + s4 * a2.y;
+            float z = s1 * a1.z + s2 * c1.z + s3 * c2.z + s4 * a2.z;
+
+            return new Vector3( x, y, z );
         }
 
         /// Returns a vector tangent to the point at time 't'
         /// This is the vector tangent to the curve at that point
         public static Vector3 EvaluateCurveDerivative(Vector3[] points, float t)
         {
-            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received " + points.Length);
+            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
             if (points.Length >= 4)
             {
                 return EvaluateCurveDerivative(points[0], points[1], points[2], points[3], t);
@@ -43,14 +53,23 @@ namespace PathCreation.Utility
         /// This is the vector tangent to the curve at that point
         public static Vector3 EvaluateCurveDerivative(Vector3 a1, Vector3 c1, Vector3 c2, Vector3 a2, float t)
         {
-            t = Mathf.Clamp01(t);
-            return 3 * (1 - t) * (1 - t) * (c1 - a1) + 6 * (1 - t) * t * (c2 - c1) + 3 * t * t * (a2 - c2);
+            t = t < 0f ? 0f : t > 1f ? 1f : t;
+
+            float s1 = 3 * (1 - t) * (1 - t);
+            float s2 = 6 * (1 - t) * t;
+            float s3 = 3 * t * t;
+
+            float x = s1 * (c1.x - a1.x) + s2 * (c2.x - c1.x) + s3 * (a2.x - c2.x);
+            float y = s1 * (c1.y - a1.y) + s2 * (c2.y - c1.y) + s3 * (a2.y - c2.y);
+            float z = s1 * (c1.z - a1.z) + s2 * (c2.z - c1.z) + s3 * (a2.z - c2.z);
+
+            return new Vector3( x, y, z );
         }
 
         /// Returns the second derivative of the curve at time 't'
         public static Vector3 EvaluateCurveSecondDerivative(Vector3[] points, float t)
         {
-            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received " + points.Length);
+            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
             if (points.Length >= 4)
             {
                 return EvaluateCurveSecondDerivative(points[0], points[1], points[2], points[3], t);
@@ -61,15 +80,23 @@ namespace PathCreation.Utility
         ///Returns the second derivative of the curve at time 't'
         public static Vector3 EvaluateCurveSecondDerivative(Vector3 a1, Vector3 c1, Vector3 c2, Vector3 a2, float t)
         {
-            t = Mathf.Clamp01(t);
-            return 6 * (1 - t) * (c2 - 2 * c1 + a1) + 6 * t * (a2 - 2 * c2 + c1);
+            t = t < 0f ? 0f : t > 1f ? 1f : t;
+
+            float s1 = 6 * (1 - t);
+            float s2 = 6 * t;
+
+            float x = s1 * (c2.x - 2 * c1.x + a1.x) + s2 * (a2.x - 2 * c2.x + c1.x);
+            float y = s1 * (c2.y - 2 * c1.y + a1.y) + s2 * (a2.y - 2 * c2.y + c1.y);
+            float z = s1 * (c2.z - 2 * c1.z + a1.z) + s2 * (a2.z - 2 * c2.z + c1.z);
+
+            return new Vector3( x, y, z );
         }
 
 
         /// Calculates the normal vector (vector perpendicular to the curve) at specified time
         public static Vector3 Normal(Vector3[] points, float t)
         {
-            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received " + points.Length);
+            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
             if (points.Length >= 4)
             {
                 return Normal(points[0], points[1], points[2], points[3], t);
@@ -88,7 +115,7 @@ namespace PathCreation.Utility
 
         public static Bounds CalculateBounds(Vector3[] points)
         {
-            Debug.Assert(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received " + points.Length);
+            Debug.AssertFormat(points.Length == 4, "Incorrect number of points supplied to cubic bezier function. Expected 4, but received {0}", points.Length);
             MinMax3D minMax = new MinMax3D();
             if (points.Length >= 4)
             {
