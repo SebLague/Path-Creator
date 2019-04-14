@@ -415,7 +415,17 @@ namespace PathCreationEditor {
 
                 Handles.color = globalDisplaySettings.normals;
                 for (int i = 0; i < normalsVertexPath.NumVertices; i++) {
-                    Handles.DrawLine (normalsVertexPath.vertices[i], normalsVertexPath.vertices[i] + normalsVertexPath.normals[i] * globalDisplaySettings.normalsLength);
+                    Vector3 prevVertex = normalsVertexPath.vertices[Mathf.Max(0, i - 1)];
+                    Vector3 nextVertex = normalsVertexPath.vertices[Mathf.Min(normalsVertexPath.NumVertices - 1, i + 1)];
+                    Vector3 forward = prevVertex - nextVertex;
+                    forward *= globalDisplaySettings.normalsWidth;
+
+                    Vector3[] points = new Vector3[4];
+                    points[0] = normalsVertexPath.vertices[i] - forward * 0.5f;
+                    points[1] = points[0] + normalsVertexPath.normals[i] * globalDisplaySettings.normalsLength;
+                    points[2] = points[1] + forward;
+                    points[3] = points[0] + forward;
+                    Handles.DrawSolidRectangleWithOutline(points, globalDisplaySettings.normals, globalDisplaySettings.normals);
                 }
 
             }
