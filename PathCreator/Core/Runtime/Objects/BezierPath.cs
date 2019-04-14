@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using UnityEngine;
 using PathCreation.Utility;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace PathCreation
     public class BezierPath
     {
         public event System.Action OnModified;
+        public event System.Action<BezierPath, int> OnAnchorAdded;
+        public event System.Action<BezierPath, int> OnAnchorRemoved;
         public enum ControlMode { Aligned, Mirrored, Free, Automatic };
 
         #region Fields
@@ -45,6 +48,12 @@ namespace PathCreation
         Quaternion rotation = Quaternion.identity;
         [SerializeField, HideInInspector]
         Vector3 scale = Vector3.one;
+
+        List<Tuple<BezierPath, int>> anchorParents = new List<Tuple<BezierPath, int>>();
+        List<List<Tuple<BezierPath, int>>> anchorChildren = new List<List<Tuple<BezierPath, int>>>();
+
+        Dictionary<BezierPath, HashSet<int>> pathIsParentAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
+        Dictionary<BezierPath, HashSet<int>> pathIsChildAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
 
         // Normals settings
         [SerializeField, HideInInspector]
@@ -319,6 +328,9 @@ namespace PathCreation
                 AutoSetAllAffectedControlPoints(points.Count - 1);
             }
 
+            if(OnAnchorAdded != null) {
+                OnAnchorAdded(this, points.Count - 1);
+            }
             NotifyPathModified();
         }
 
@@ -351,6 +363,9 @@ namespace PathCreation
             if (controlMode == ControlMode.Automatic)
             {
                 AutoSetAllAffectedControlPoints(0);
+            }
+            if(OnAnchorAdded != null) {
+                OnAnchorAdded(this, 0);
             }
             NotifyPathModified();
         }
@@ -393,6 +408,10 @@ namespace PathCreation
             float splitAngle = Mathf.LerpAngle(anglePrev,angleNext,splitTime);
             perAnchorNormalsAngle.Insert(newAnchorAngleIndex, splitAngle);
 
+            if(OnAnchorAdded != null) {
+                OnAnchorAdded(this, segmentIndex);
+            }
+
             NotifyPathModified();
         }
 
@@ -424,6 +443,10 @@ namespace PathCreation
                 if (controlMode == ControlMode.Automatic)
                 {
                     AutoSetAllControlPoints();
+                }
+
+                if(OnAnchorRemoved != null) {
+                    OnAnchorRemoved(this, anchorIndex);
                 }
 
                 NotifyPathModified();
@@ -694,9 +717,57 @@ namespace PathCreation
             }
         }
 
+        public void AddAnchorChild(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
+            while (anchorChildren.Count < points.Count / 3) {
+                anchorChildren.Add(null);
+            }
+            if(anchorChildren[anchorIndex] == null) {
+                anchorChildren[anchorIndex] = new List<Tuple<BezierPath, int>>();
+            }
+            anchorChildren[anchorIndex].Add(new Tuple<BezierPath, int>(targetPath, targetAnchorIndex));
+
+            if (pathIsChildAtAnchor[targetPath] == null) {
+                pathIsChildAtAnchor[targetPath] = new HashSet<int>();
+            }
+            pathIsChildAtAnchor[targetPath].Add(anchorIndex);
+        }
+
+        public void RemoveAnchorChild(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
+            anchorChildren[anchorIndex].RemoveAll((x) => (x.Item1 == targetPath && x.Item2 == targetAnchorIndex));
+
+            if(pathIsChildAtAnchor[targetPath] != null) {
+                pathIsChildAtAnchor[targetPath].Remove(anchorIndex);
+            }
+            if(pathIsChildAtAnchor[targetPath].Count == 0) {
+                pathIsChildAtAnchor[targetPath] = null;
+            }
+        }
+
         #endregion
 
         #region Internal methods and accessors
+
+        void AddAnchorParent(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
+            while (anchorParents.Count < points.Count / 3) {
+                anchorParents.Add(null);
+            }
+            if (anchorParents[anchorIndex] != null) {
+                RemoveAnchorParent(anchorIndex);
+            }
+            anchorChildren[anchorIndex].Add(new Tuple<BezierPath, int>(targetPath, targetAnchorIndex));
+
+            if (pathIsChildAtAnchor[targetPath] == null) {
+                pathIsChildAtAnchor[targetPath] = new HashSet<int>();
+            }
+            pathIsChildAtAnchor[targetPath].Add(anchorIndex);
+        }
+
+        void RemoveAnchorParent(int anchorIndex) {            
+            if (pathIsParentAtAnchor.ContainsKey(anchorParents[anchorIndex].Item1)) {
+                pathIsParentAtAnchor.Remove(anchorParents[anchorIndex].Item1);
+            }
+            anchorParents[anchorIndex] = null;
+        }
 
         /// Update the bounding box of the path
         void UpdateBounds()
