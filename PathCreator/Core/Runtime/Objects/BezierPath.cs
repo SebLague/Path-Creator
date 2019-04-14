@@ -49,11 +49,7 @@ namespace PathCreation
         [SerializeField, HideInInspector]
         Vector3 scale = Vector3.one;
 
-        List<Tuple<BezierPath, int>> anchorParents = new List<Tuple<BezierPath, int>>();
-        List<List<Tuple<BezierPath, int>>> anchorChildren = new List<List<Tuple<BezierPath, int>>>();
-
-        Dictionary<BezierPath, HashSet<int>> pathIsParentAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
-        Dictionary<BezierPath, HashSet<int>> pathIsChildAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
+        
 
         // Normals settings
         [SerializeField, HideInInspector]
@@ -63,6 +59,66 @@ namespace PathCreation
         [SerializeField, HideInInspector]
         bool flipNormals;
 
+        #endregion
+
+        #region Parent/Child
+        private List<Tuple<BezierPath, int>> _anchorParents;
+        List<Tuple<BezierPath, int>> anchorParents {
+            get {
+                if (_anchorParents == null) {
+                    _anchorParents = new List<Tuple<BezierPath, int>>();
+                }
+                while (_anchorParents.Count < NumAnchorPoints) {
+                    _anchorParents.Add(null);
+                }
+                return _anchorParents;
+            }
+            set {
+                _anchorParents = value;
+            }
+        }
+
+        private List<List<Tuple<BezierPath, int>>> _anchorChildren;
+        List<List<Tuple<BezierPath, int>>> anchorChildren {
+            get {
+                if (_anchorChildren == null) {
+                    _anchorChildren = new List<List<Tuple<BezierPath, int>>>();
+                }
+                while (_anchorChildren.Count < NumAnchorPoints) {
+                    _anchorChildren.Add(null);
+                }
+                return _anchorChildren;
+            }
+            set {
+                _anchorChildren = value;
+            }
+        }
+
+        private Dictionary<BezierPath, HashSet<int>> _pathIsParentAtAnchor;
+        Dictionary<BezierPath, HashSet<int>> pathIsParentAtAnchor {
+            get {
+                if(_pathIsParentAtAnchor == null) {
+                    _pathIsParentAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
+                }
+                return _pathIsParentAtAnchor;
+            }
+            set {
+                _pathIsParentAtAnchor = value;
+            }
+        }
+
+        private Dictionary<BezierPath, HashSet<int>> _pathIsChildAtAnchor;
+        Dictionary<BezierPath, HashSet<int>> pathIsChildAtAnchor {
+            get {
+                if (_pathIsChildAtAnchor == null) {
+                    _pathIsChildAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
+                }
+                return _pathIsChildAtAnchor;
+            }
+            set {
+                _pathIsChildAtAnchor = value;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -718,9 +774,6 @@ namespace PathCreation
         }
 
         public void AddAnchorChild(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            while (anchorChildren.Count < points.Count / 3) {
-                anchorChildren.Add(null);
-            }
             if(anchorChildren[anchorIndex] == null) {
                 anchorChildren[anchorIndex] = new List<Tuple<BezierPath, int>>();
             }
@@ -739,18 +792,14 @@ namespace PathCreation
                 pathIsChildAtAnchor[targetPath].Remove(anchorIndex);
             }
             if(pathIsChildAtAnchor[targetPath].Count == 0) {
-                pathIsChildAtAnchor[targetPath] = null;
+                pathIsChildAtAnchor.Remove(targetPath);
+                if (!pathIsParentAtAnchor.ContainsKey(targetPath)) {
+                    //TODO: unsubscribe from target path 
+                }
             }
         }
 
-        #endregion
-
-        #region Internal methods and accessors
-
-        void AddAnchorParent(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            while (anchorParents.Count < points.Count / 3) {
-                anchorParents.Add(null);
-            }
+        public void AddAnchorParent(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
             if (anchorParents[anchorIndex] != null) {
                 RemoveAnchorParent(anchorIndex);
             }
@@ -762,12 +811,42 @@ namespace PathCreation
             pathIsChildAtAnchor[targetPath].Add(anchorIndex);
         }
 
-        void RemoveAnchorParent(int anchorIndex) {            
-            if (pathIsParentAtAnchor.ContainsKey(anchorParents[anchorIndex].Item1)) {
-                pathIsParentAtAnchor.Remove(anchorParents[anchorIndex].Item1);
+        public void RemoveAnchorParent(int anchorIndex) {
+            if (anchorParents[anchorIndex] == null) {
+                Debug.LogWarning("Attempted to remove non-existent parent");
+                return;
+            }
+            BezierPath targetPath = anchorParents[anchorIndex].Item1;
+            int targetAnchor = anchorParents[anchorIndex].Item2;
+            if (pathIsParentAtAnchor.ContainsKey(targetPath)) {
+                pathIsParentAtAnchor[targetPath].Remove(targetAnchor);
+            }
+            if (pathIsParentAtAnchor[targetPath].Count == 0) {
+                pathIsParentAtAnchor.Remove(targetPath);
+                if (!pathIsChildAtAnchor.ContainsKey(targetPath)) {
+                    //TODO: unsubscribe from target path
+                }
             }
             anchorParents[anchorIndex] = null;
         }
+
+        //TemporaryDebugMethod
+        public void PrintParentChildDebugInfo() {
+            Debug.Log(string.Format("Has {0} anchor points", NumAnchorPoints));
+            for (int i = 0; i < anchorParents.Count; i++) {
+                if (anchorParents[i] == null) {
+                    Debug.Log(string.Format("Parent of {0}: {1}", i, "null"));
+                } else {
+                    Debug.Log(string.Format("Parent of {0}: {1}", i, anchorParents[i].ToString()));
+                }
+            }
+            foreach (var pair in pathIsParentAtAnchor) {
+                Debug.Log(pair.ToString());
+            }
+        }
+        #endregion
+
+        #region Internal methods and accessors
 
         /// Update the bounding box of the path
         void UpdateBounds()
