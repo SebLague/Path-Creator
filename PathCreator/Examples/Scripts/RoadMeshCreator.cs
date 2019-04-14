@@ -11,6 +11,7 @@ namespace PathCreation.Examples
         [Range(0, .5f)]
         public float thickness = .15f;
         public bool flattenSurface;
+        public bool meshCollider;
 
         [Header("Material settings")]
         public Material roadMaterial;
@@ -20,16 +21,19 @@ namespace PathCreation.Examples
         MeshFilter meshFilter;
         MeshRenderer meshRenderer;
 
+        Transform meshHolder;
+
         protected override void PathUpdated()
         {
             if (pathCreator != null)
             {
                 AssignMeshComponents();
                 AssignMaterials();
-                meshFilter.mesh = CreateRoadMesh();;
+                meshFilter.mesh = CreateRoadMesh();
+                UpdateMeshCollider(meshCollider);
             }
         }
-
+        
 
         Mesh CreateRoadMesh()
         {
@@ -133,7 +137,7 @@ namespace PathCreation.Examples
         {
             // Find/creator mesh holder object in children
             string meshHolderName = "Mesh Holder";
-            Transform meshHolder = transform.Find(meshHolderName);
+            meshHolder = transform.Find(meshHolderName);
             if (meshHolder == null) {
                 meshHolder = new GameObject(meshHolderName).transform;
                 meshHolder.transform.parent = transform;
@@ -165,6 +169,31 @@ namespace PathCreation.Examples
                 meshRenderer.sharedMaterials[0].mainTextureScale = new Vector3(1, textureTiling);
             }
         }
+
+        //update meshcolider if enabled
+        void UpdateMeshCollider(bool meshColliderEnable)
+        {
+            if (meshHolder != null)
+            {
+                MeshCollider meshCol = meshHolder.GetComponent<MeshCollider>();
+                if (meshCol != null)
+                {
+                    if (meshColliderEnable)
+                    {
+                        meshCol.sharedMesh = meshHolder.GetComponent<MeshFilter>().sharedMesh;
+                    }
+                    else
+                    {
+                        DestroyImmediate(meshCol);
+                    }                
+                }
+                else if (meshColliderEnable)
+                {
+                    meshHolder.gameObject.AddComponent<MeshCollider>();
+                }
+            }
+        }
+
 
     }
 }
