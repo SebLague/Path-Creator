@@ -49,6 +49,8 @@ namespace PathCreation
         public Color normals = Color.yellow;
         [Range(0,1)]
         public float normalsLength = .1f;
+        [Range(0.005f, 0.2f)]
+        public float normalsWidth = 0.01f;
 
 #if UNITY_EDITOR
         public static GlobalDisplaySettings Load() {
