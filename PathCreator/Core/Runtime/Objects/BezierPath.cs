@@ -19,6 +19,11 @@ namespace PathCreation
     [System.Serializable]
     public class BezierPath
     {
+        public struct Connection {
+            public int anchorIndex;
+            public BezierPath targetPath;
+            public int targetAnchorIndex;
+        }
         public event System.Action OnModified;
         public event System.Action<BezierPath, int> OnAnchorAdded;
         public event System.Action<BezierPath, int> OnAnchorRemoved;
@@ -62,63 +67,10 @@ namespace PathCreation
         #endregion
 
         #region Parent/Child
-        private List<Tuple<BezierPath, int>> _anchorParents;
-        List<Tuple<BezierPath, int>> anchorParents {
-            get {
-                if (_anchorParents == null) {
-                    _anchorParents = new List<Tuple<BezierPath, int>>();
-                }
-                while (_anchorParents.Count < NumAnchorPoints) {
-                    _anchorParents.Add(null);
-                }
-                return _anchorParents;
-            }
-            set {
-                _anchorParents = value;
-            }
-        }
-
-        private List<List<Tuple<BezierPath, int>>> _anchorChildren;
-        List<List<Tuple<BezierPath, int>>> anchorChildren {
-            get {
-                if (_anchorChildren == null) {
-                    _anchorChildren = new List<List<Tuple<BezierPath, int>>>();
-                }
-                while (_anchorChildren.Count < NumAnchorPoints) {
-                    _anchorChildren.Add(null);
-                }
-                return _anchorChildren;
-            }
-            set {
-                _anchorChildren = value;
-            }
-        }
-
-        private Dictionary<BezierPath, HashSet<int>> _pathIsParentAtAnchor;
-        Dictionary<BezierPath, HashSet<int>> pathIsParentAtAnchor {
-            get {
-                if(_pathIsParentAtAnchor == null) {
-                    _pathIsParentAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
-                }
-                return _pathIsParentAtAnchor;
-            }
-            set {
-                _pathIsParentAtAnchor = value;
-            }
-        }
-
-        private Dictionary<BezierPath, HashSet<int>> _pathIsChildAtAnchor;
-        Dictionary<BezierPath, HashSet<int>> pathIsChildAtAnchor {
-            get {
-                if (_pathIsChildAtAnchor == null) {
-                    _pathIsChildAtAnchor = new Dictionary<BezierPath, HashSet<int>>();
-                }
-                return _pathIsChildAtAnchor;
-            }
-            set {
-                _pathIsChildAtAnchor = value;
-            }
-        }
+        [SerializeField, HideInInspector]
+        public List<List<Tuple<BezierPath, int>>> connections;
+        [SerializeField, HideInInspector]
+        public Dictionary<BezierPath, int> connectionCount;
         #endregion
 
         #region Constructors
@@ -773,80 +725,65 @@ namespace PathCreation
             }
         }
 
-        public void AddAnchorChild(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            if(anchorChildren[anchorIndex] == null) {
-                anchorChildren[anchorIndex] = new List<Tuple<BezierPath, int>>();
+        public void CreateConnectionAt(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
+            if(connections == null) { connections = new List<List<Tuple<BezierPath, int>>>(); }
+            if(connectionCount == null) { connectionCount = new Dictionary<BezierPath, int>(); }
+            Debug.Log(string.Format("Adding connection | current curve {0} | target curve {1}", anchorIndex, targetAnchorIndex));
+            while(connections.Count <= anchorIndex) {
+                connections.Add(null);
             }
-            anchorChildren[anchorIndex].Add(new Tuple<BezierPath, int>(targetPath, targetAnchorIndex));
-
-            if (pathIsChildAtAnchor[targetPath] == null) {
-                pathIsChildAtAnchor[targetPath] = new HashSet<int>();
+            if (connections[anchorIndex] == null) {
+                connections[anchorIndex] = new List<Tuple<BezierPath, int>>();
             }
-            pathIsChildAtAnchor[targetPath].Add(anchorIndex);
-        }
+            connections[anchorIndex].Add(new Tuple<BezierPath, int>(targetPath, targetAnchorIndex));
+            Debug.Log(string.Format("Added connection at anchor {0}", anchorIndex));
+            Debug.Log(string.Format("Connections list has {0} entries, {1} of which contain data", 
+                connections.Count, connections.Count((x) => { return x != null && x.Count != 0; })));
 
-        public void RemoveAnchorChild(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            anchorChildren[anchorIndex].RemoveAll((x) => (x.Item1 == targetPath && x.Item2 == targetAnchorIndex));
-
-            if(pathIsChildAtAnchor[targetPath] != null) {
-                pathIsChildAtAnchor[targetPath].Remove(anchorIndex);
-            }
-            if(pathIsChildAtAnchor[targetPath].Count == 0) {
-                pathIsChildAtAnchor.Remove(targetPath);
-                if (!pathIsParentAtAnchor.ContainsKey(targetPath)) {
-                    //TODO: unsubscribe from target path 
-                }
+            if (connectionCount.ContainsKey(targetPath)) {
+                connectionCount[targetPath] += 1;
+            } else {
+                connectionCount[targetPath] = 1;
+                Subscribe(targetPath);
             }
         }
 
-        public void AddAnchorParent(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            if (anchorParents[anchorIndex] != null) {
-                RemoveAnchorParent(anchorIndex);
-            }
-            anchorChildren[anchorIndex].Add(new Tuple<BezierPath, int>(targetPath, targetAnchorIndex));
-
-            if (pathIsChildAtAnchor[targetPath] == null) {
-                pathIsChildAtAnchor[targetPath] = new HashSet<int>();
-            }
-            pathIsChildAtAnchor[targetPath].Add(anchorIndex);
-        }
-
-        public void RemoveAnchorParent(int anchorIndex) {
-            if (anchorParents[anchorIndex] == null) {
-                Debug.LogWarning("Attempted to remove non-existent parent");
-                return;
-            }
-            BezierPath targetPath = anchorParents[anchorIndex].Item1;
-            int targetAnchor = anchorParents[anchorIndex].Item2;
-            if (pathIsParentAtAnchor.ContainsKey(targetPath)) {
-                pathIsParentAtAnchor[targetPath].Remove(targetAnchor);
-            }
-            if (pathIsParentAtAnchor[targetPath].Count == 0) {
-                pathIsParentAtAnchor.Remove(targetPath);
-                if (!pathIsChildAtAnchor.ContainsKey(targetPath)) {
-                    //TODO: unsubscribe from target path
-                }
-            }
-            anchorParents[anchorIndex] = null;
-        }
-
-        //TemporaryDebugMethod
-        public void PrintParentChildDebugInfo() {
-            Debug.Log(string.Format("Has {0} anchor points", NumAnchorPoints));
-            for (int i = 0; i < anchorParents.Count; i++) {
-                if (anchorParents[i] == null) {
-                    Debug.Log(string.Format("Parent of {0}: {1}", i, "null"));
-                } else {
-                    Debug.Log(string.Format("Parent of {0}: {1}", i, anchorParents[i].ToString()));
-                }
-            }
-            foreach (var pair in pathIsParentAtAnchor) {
-                Debug.Log(pair.ToString());
+        public void RemoveConnectionAt(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
+            connections[anchorIndex].RemoveAll((x) => { return x.Item1 == targetPath && x.Item2 == targetAnchorIndex; });
+            connectionCount[targetPath] -= 1;
+            if(connectionCount[targetPath] == 0) {
+                Unsubscribe(targetPath);
             }
         }
         #endregion
 
         #region Internal methods and accessors
+        public void HandleConnectedCurveModified() {
+            Debug.Log("Connected curve modified");
+            for (int i = 0; i < connections.Count; i++) {
+                var list = connections[i];
+                Vector3 anchorPosition = points[i * 3];
+                if(list != null) {
+                    for(int j = 0; j < list.Count; j++) {
+                        Tuple<BezierPath, int> connection = list[j];
+                        BezierPath targetPath = connection.Item1;
+                        int targetAnchorIndex = connection.Item2;
+                        Vector3 targetAnchorPosition = targetPath.points[targetAnchorIndex * 3];
+                        if(anchorPosition != targetAnchorPosition) {
+                            MovePoint(i * 3, targetAnchorPosition);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Subscribe(BezierPath targetPath) {
+            targetPath.OnModified += HandleConnectedCurveModified;
+        }
+
+        void Unsubscribe(BezierPath targetPath) {
+            targetPath.OnModified -= HandleConnectedCurveModified;
+        }
 
         /// Update the bounding box of the path
         void UpdateBounds()
