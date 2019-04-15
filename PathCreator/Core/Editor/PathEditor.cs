@@ -60,6 +60,9 @@ namespace PathCreationEditor {
         Quaternion currentHandleRot = Quaternion.identity;
         Color handlesStartCol;
 
+        PathCreator other;
+        int targetAnchorIndex;
+
         // Constants
         const int bezierPathTab = 0;
         const int vertexPathTab = 1;
@@ -120,8 +123,13 @@ namespace PathCreationEditor {
                     // If a point has been selected
                     if (handleIndexToDisplayAsTransform != -1) {
                         EditorGUILayout.LabelField ("Selected Point:");
-
+                        var anchorIndex = handleIndexToDisplayAsTransform / 3;
                         using (new EditorGUI.IndentLevelScope ()) {
+                            if (handleIndexToDisplayAsTransform % 3 == 0) {
+                                using (new EditorGUI.DisabledGroupScope(true)) {
+                                    EditorGUILayout.IntField("Anchor Index", anchorIndex);
+                                }
+                            }
                             var currentPosition = creator.bezierPath[handleIndexToDisplayAsTransform];
                             var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
                             if (newPosition != currentPosition) {
@@ -130,12 +138,23 @@ namespace PathCreationEditor {
                             }
                             // Don't draw the angle field if we aren't selecting an anchor point/not in 3d space
                             if (handleIndexToDisplayAsTransform % 3 == 0 && creator.bezierPath.Space == PathSpace.xyz) {
-                                var anchorIndex = handleIndexToDisplayAsTransform / 3;
                                 var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
                                 var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
                                 if (newAngle != currentAngle) {
                                     Undo.RecordObject (creator, "Set Angle");
                                     creator.bezierPath.SetAnchorNormalAngle (anchorIndex, newAngle);
+                                }
+                            }
+                            EditorGUILayout.Space();
+                            EditorGUILayout.LabelField("Parent Anchor");
+                            other = (PathCreator)EditorGUILayout.ObjectField("Parent Path", other, typeof(PathCreator), true);
+                            if(other == null) {
+                                targetAnchorIndex = -1;
+                            }
+                            targetAnchorIndex = EditorGUILayout.IntField("Anchor Index", targetAnchorIndex);
+                            if (other != null && targetAnchorIndex >= 0) {
+                                if (GUILayout.Button("Create Connection")) {
+                                    bezierPath.CreateConnection(anchorIndex, other, targetAnchorIndex);
                                 }
                             }
                         }
@@ -178,6 +197,19 @@ namespace PathCreationEditor {
                     data.keepConstantHandleSize = GUILayout.Toggle (data.keepConstantHandleSize, new GUIContent ("Constant Point Size", constantSizeTooltip));
                     data.bezierHandleScale = Mathf.Max (0, EditorGUILayout.FloatField (new GUIContent ("Handle Scale"), data.bezierHandleScale));
                     DrawGlobalDisplaySettingsInspector ();
+                }
+
+                // Connection Debug
+                using (new EditorGUI.DisabledGroupScope(true)) {
+                    var connectionsListExists = EditorGUILayout.Toggle("Connections Exist", bezierPath.connections != null);
+                    if (connectionsListExists) {
+                        EditorGUILayout.IntField("Connection list size", bezierPath.connections.Count);
+                    }
+                    EditorGUILayout.IntField("OnModified count", bezierPath.OnModifiedDelegateCount);
+                    EditorGUILayout.LabelField("OnModified list", bezierPath.OnModifiedDelegateList);
+                }
+                if (GUILayout.Button("Clear Connections")) {
+                    bezierPath.ClearConnections();
                 }
 
                 if (check.changed) {
@@ -707,6 +739,9 @@ namespace PathCreationEditor {
 
             bezierPath.OnModified -= OnPathModifed;
             bezierPath.OnModified += OnPathModifed;
+
+            Debug.Log("Resubscribing");
+            bezierPath.EnsureSubscriptionsUpToDate();
 
             SceneView.RepaintAll ();
             EditorApplication.QueuePlayerLoopUpdate ();
