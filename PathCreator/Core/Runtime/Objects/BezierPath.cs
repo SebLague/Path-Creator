@@ -19,11 +19,19 @@ namespace PathCreation
     [System.Serializable]
     public class BezierPath
     {
+        [System.Serializable]
         public struct Connection {
             public int anchorIndex;
-            public BezierPath targetPath;
+            public PathCreator targetPath;
             public int targetAnchorIndex;
+
+            public Connection(int anchorIndex, PathCreator targetPath, int targetAnchorIndex) {
+                this.anchorIndex = anchorIndex;
+                this.targetPath = targetPath;
+                this.targetAnchorIndex = targetAnchorIndex;
+            }
         }
+        [SerializeField, HideInInspector]
         public event System.Action OnModified;
         public event System.Action<BezierPath, int> OnAnchorAdded;
         public event System.Action<BezierPath, int> OnAnchorRemoved;
@@ -68,9 +76,7 @@ namespace PathCreation
 
         #region Parent/Child
         [SerializeField, HideInInspector]
-        public List<List<Tuple<BezierPath, int>>> connections;
-        [SerializeField, HideInInspector]
-        public Dictionary<BezierPath, int> connectionCount;
+        public List<Connection> connections;
         #endregion
 
         #region Constructors
@@ -725,64 +731,66 @@ namespace PathCreation
             }
         }
 
-        public void CreateConnectionAt(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            if(connections == null) { connections = new List<List<Tuple<BezierPath, int>>>(); }
-            if(connectionCount == null) { connectionCount = new Dictionary<BezierPath, int>(); }
-            Debug.Log(string.Format("Adding connection | current curve {0} | target curve {1}", anchorIndex, targetAnchorIndex));
-            while(connections.Count <= anchorIndex) {
-                connections.Add(null);
+        public void CreateConnection(int anchorIndex, PathCreator targetPath, int targetAnchorIndex) {
+            if(connections == null) { connections = new List<Connection>(); }
+            if (targetPath.bezierPath == this) {
+                Debug.LogError("Cannot form connection with self");
+                return;
             }
-            if (connections[anchorIndex] == null) {
-                connections[anchorIndex] = new List<Tuple<BezierPath, int>>();
-            }
-            connections[anchorIndex].Add(new Tuple<BezierPath, int>(targetPath, targetAnchorIndex));
-            Debug.Log(string.Format("Added connection at anchor {0}", anchorIndex));
-            Debug.Log(string.Format("Connections list has {0} entries, {1} of which contain data", 
-                connections.Count, connections.Count((x) => { return x != null && x.Count != 0; })));
-
-            if (connectionCount.ContainsKey(targetPath)) {
-                connectionCount[targetPath] += 1;
-            } else {
-                connectionCount[targetPath] = 1;
+            if(connections.Count((x) => { return x.targetPath == targetPath; }) == 0){
                 Subscribe(targetPath);
+            }
+            connections.Add(new Connection(anchorIndex, targetPath, targetAnchorIndex));
+        }
+
+        public void RemoveConnection(int anchorIndex, PathCreator targetPath, int targetAnchorIndex) {
+            connections.RemoveAll((x) => { return x.anchorIndex == anchorIndex && x.targetPath == targetPath && x.targetAnchorIndex == targetAnchorIndex; });
+            if (connections.Count((x) => { return x.targetPath == targetPath; }) == 0) {
+                Unsubscribe(targetPath);
             }
         }
 
-        public void RemoveConnectionAt(int anchorIndex, BezierPath targetPath, int targetAnchorIndex) {
-            connections[anchorIndex].RemoveAll((x) => { return x.Item1 == targetPath && x.Item2 == targetAnchorIndex; });
-            connectionCount[targetPath] -= 1;
-            if(connectionCount[targetPath] == 0) {
-                Unsubscribe(targetPath);
+        public void RemoveConnection(Connection connection) {
+            RemoveConnection(connection.anchorIndex, connection.targetPath, connection.targetAnchorIndex);
+        }
+
+        public void ClearConnections() {
+            int initialCount = connections.Count;
+            int iterations = 0;
+            while(connections.Count > 0 && iterations <= initialCount) {
+                Connection connection = connections[0];
+                RemoveConnection(connection);
+                iterations++;
             }
         }
         #endregion
 
         #region Internal methods and accessors
         public void HandleConnectedCurveModified() {
-            Debug.Log("Connected curve modified");
             for (int i = 0; i < connections.Count; i++) {
-                var list = connections[i];
-                Vector3 anchorPosition = points[i * 3];
-                if(list != null) {
-                    for(int j = 0; j < list.Count; j++) {
-                        Tuple<BezierPath, int> connection = list[j];
-                        BezierPath targetPath = connection.Item1;
-                        int targetAnchorIndex = connection.Item2;
-                        Vector3 targetAnchorPosition = targetPath.points[targetAnchorIndex * 3];
-                        if(anchorPosition != targetAnchorPosition) {
-                            MovePoint(i * 3, targetAnchorPosition);
-                        }
-                    }
+                Connection connection = connections[i];
+                Vector3 anchorPosition = points[connection.anchorIndex * 3];
+                Vector3 targetAnchorPosition = connection.targetPath.bezierPath.points[connection.targetAnchorIndex * 3];
+                if(anchorPosition != targetAnchorPosition) {
+                    MovePoint(connection.anchorIndex * 3, targetAnchorPosition);
                 }
             }
         }
 
-        void Subscribe(BezierPath targetPath) {
-            targetPath.OnModified += HandleConnectedCurveModified;
+        void Subscribe(PathCreator targetPath) {
+            targetPath.bezierPath.OnModified -= HandleConnectedCurveModified;
+            targetPath.bezierPath.OnModified += HandleConnectedCurveModified;
         }
 
-        void Unsubscribe(BezierPath targetPath) {
-            targetPath.OnModified -= HandleConnectedCurveModified;
+        void Unsubscribe(PathCreator targetPath) {
+            targetPath.bezierPath.OnModified -= HandleConnectedCurveModified;
+        }
+
+        public void EnsureSubscriptionsUpToDate() {
+            foreach(var connection in connections) {
+                //Debug.Log(connection.targetPath);
+                Subscribe(connection.targetPath);
+            }
         }
 
         /// Update the bounding box of the path
@@ -1026,6 +1034,18 @@ namespace PathCreation
             {
                 OnModified();
             }
+        }
+
+        #endregion
+
+        #region Debug
+
+        public int OnModifiedDelegateCount {
+            get { return (OnModified == null) ? 0 : OnModified.GetInvocationList().Count(); }
+        }
+
+        public string OnModifiedDelegateList {
+            get { return (OnModified == null) ? "" : string.Join(", ", OnModified.GetInvocationList().ToList().ConvertAll((x) => { return x.Method.ToString(); })); }
         }
 
         #endregion
