@@ -47,6 +47,7 @@ namespace PathCreation
 
         public void Initialize(Vector3 centre, bool defaultIs2D)
         {
+            Debug.Log("In Initialization");
             if (_bezierPath == null)
             {
                 CreateBezier(centre, defaultIs2D);
@@ -54,6 +55,7 @@ namespace PathCreation
             vertexPathUpToDate = false;
             _bezierPath.OnModified -= BezierPathEdited;
             _bezierPath.OnModified += BezierPathEdited;
+            _bezierPath.EnsureSubscriptionsUpToDate();
         }
 
         public void ResetBezierPath(Vector3 centre, bool defaultIs2D = false)
@@ -70,6 +72,7 @@ namespace PathCreation
 
             var space = (defaultIs2D) ? PathSpace.xy : PathSpace.xyz;
             _bezierPath = new BezierPath(centre, false, space);
+            Debug.Log("Created new path");
 
             _bezierPath.OnModified += BezierPathEdited;
             vertexPathUpToDate = false;
