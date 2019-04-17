@@ -109,6 +109,7 @@ namespace PathCreation
 
             Space = space;
             IsClosed = isClosed;
+            connections = new List<Connection>();
         }
 
         /// <summary> Creates a path from the supplied 3D points </summary>
@@ -138,6 +139,7 @@ namespace PathCreation
 
             this.Space = space;
             this.IsClosed = isClosed;
+            connections = new List<Connection>();
         }
 
         /// <summary> Creates a path from the positions of the supplied 2D points </summary>
