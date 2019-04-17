@@ -1035,12 +1035,18 @@ namespace PathCreation
             //TODO: Assign default position of second anchor of new path
         }
 
+        public static void CreateTwoWayConnection(PathCreator path1, int anchorIndex1, PathCreator path2, int anchorIndex2)
+        {
+            path1.bezierPath.CreateConnection(anchorIndex1, path2, anchorIndex2);
+            path2.bezierPath.CreateConnection(anchorIndex2, path1, anchorIndex1);
+        }
+
         public void CreateConnection(int anchorIndex, PathCreator targetPath, int targetAnchorIndex)
         {
             if (connections == null) { connections = new List<Connection>(); }
             if (targetPath.bezierPath == this)
             {
-                Debug.LogError("Cannot form connection with self");
+                //Debug.LogError("Cannot form connection with self");
                 return;
             }
             if (connections.Count((x) => { return x.targetPath == targetPath; }) == 0)
@@ -1050,13 +1056,20 @@ namespace PathCreation
             Connection newConnection = new Connection(anchorIndex, targetPath, targetAnchorIndex);
             if (connections.Contains(newConnection))
             {
-                Debug.Log("Attempted to create duplicate connection");
+                //Debug.Log("Attempted to create duplicate connection");
+                return;
             }
             else
             {
                 connections.Add(newConnection);
             }
             NotifyConnectionsChanged();
+        }
+
+        public static void RemoveConnectionTwoWay(PathCreator path1, int anchorIndex1, PathCreator path2, int anchorIndex2)
+        {
+            path1.bezierPath.RemoveConnection(anchorIndex1, path2, anchorIndex2);
+            path2.bezierPath.RemoveConnection(anchorIndex2, path1, anchorIndex1);
         }
 
         public void RemoveConnection(int anchorIndex, PathCreator targetPath, int targetAnchorIndex)
