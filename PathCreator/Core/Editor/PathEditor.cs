@@ -62,7 +62,8 @@ namespace PathCreationEditor
         Quaternion currentHandleRot = Quaternion.identity;
         Color handlesStartCol;
 
-        PathCreator other;
+        int fromAnchorIndex;
+        PathCreator targetPath;
         int targetAnchorIndex;
 
         // Constants
@@ -162,23 +163,7 @@ namespace PathCreationEditor
                                     Undo.RecordObject(creator, "Set Angle");
                                     creator.bezierPath.SetAnchorNormalAngle(anchorIndex, newAngle);
                                 }
-                            }
-                            EditorGUILayout.Space();
-                            EditorGUILayout.LabelField("Parent Anchor");
-                            other = (PathCreator)EditorGUILayout.ObjectField("Parent Path", other, typeof(PathCreator), true);
-                            if (other == null)
-                            {
-                                targetAnchorIndex = -1;
-                            }
-                            targetAnchorIndex = EditorGUILayout.IntField("Anchor Index", targetAnchorIndex);
-                            if (other != null && targetAnchorIndex >= 0)
-                            {
-                                if (GUILayout.Button("Create Connection"))
-                                {
-                                    bezierPath.CreateConnection(anchorIndex, other, targetAnchorIndex);
-                                    other.bezierPath.CreateConnection(targetAnchorIndex, creator, anchorIndex);
-                                }
-                            }
+                            }                            
                         }
                     }
 
@@ -233,20 +218,28 @@ namespace PathCreationEditor
                     EditorGUILayout.LabelField("Add New Connection");
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        selectedSegmentIndex = EditorGUILayout.IntField("From", selectedSegmentIndex);
-                        other = (PathCreator)EditorGUILayout.ObjectField("Target Path", other, typeof(PathCreator), allowSceneObjects: true);
-                        targetAnchorIndex = EditorGUILayout.IntField("To", targetAnchorIndex);
-                        bool validSegmentIndex = selectedSegmentIndex >= 0 && selectedSegmentIndex < bezierPath.NumAnchorPoints;
-                        bool validTargetPath = other != null && other.bezierPath != null;
-                        bool validTargetAnchorIndex = validTargetPath && targetAnchorIndex >= 0 && targetAnchorIndex < other.bezierPath.NumAnchorPoints;
-                        if (!(validSegmentIndex && validTargetPath && validTargetAnchorIndex))
-                        {
-                            GUI.enabled = false;
-                        }
+                        fromAnchorIndex = EditorGUILayout.IntSlider("From", fromAnchorIndex, 0, creator.bezierPath.NumAnchorPoints - 1);
+                        targetPath = (PathCreator)EditorGUILayout.ObjectField("Target Path", targetPath, typeof(PathCreator), allowSceneObjects: true);
+                        GUI.enabled = targetPath != null;
+                        targetAnchorIndex = EditorGUILayout.IntSlider("To", targetAnchorIndex, 0, (targetPath != null) ? targetPath.bezierPath.NumAnchorPoints - 1 : 0);
+                        GUI.enabled = true;
+
+                        bool validAnchorIndex = fromAnchorIndex >= 0 && fromAnchorIndex < bezierPath.NumAnchorPoints;
+                        bool validTargetPath = targetPath != null && targetPath.bezierPath != null;
+                        bool validTargetAnchorIndex = validTargetPath && targetAnchorIndex >= 0 && targetAnchorIndex < targetPath.bezierPath.NumAnchorPoints;
+
+                        GUI.enabled = validAnchorIndex && validTargetPath && validTargetAnchorIndex;
                         if (GUI.Button(EditorGUI.IndentedRect(EditorGUILayout.GetControlRect()), "Create Connection"))
                         {
-                            bezierPath.CreateConnection(selectedSegmentIndex, other, targetAnchorIndex);
-                            other.bezierPath.CreateConnection(targetAnchorIndex, creator, selectedSegmentIndex);
+                            BezierPath.CreateTwoWayConnection(creator, fromAnchorIndex, targetPath, targetAnchorIndex);
+                            foreach(var connection in bezierPath.ConnectionsAt(fromAnchorIndex))
+                            {
+                                BezierPath.CreateTwoWayConnection(targetPath, targetAnchorIndex, connection.targetPath, connection.targetAnchorIndex);
+                            }
+                            foreach(var connection in targetPath.bezierPath.ConnectionsAt(targetAnchorIndex))
+                            {
+                                BezierPath.CreateTwoWayConnection(creator, fromAnchorIndex, connection.targetPath, connection.targetAnchorIndex);
+                            }
                         }
                         GUI.enabled = true;
                     }
@@ -264,8 +257,7 @@ namespace PathCreationEditor
                                 {
                                     foreach (var connection in connectionsAt)
                                     {
-                                        bezierPath.RemoveConnection(connection);
-                                        connection.targetPath.bezierPath.RemoveConnection(connection.targetAnchorIndex, creator, connection.anchorIndex);
+                                        BezierPath.RemoveConnectionTwoWay(creator, connection.anchorIndex, connection.targetPath, connection.targetAnchorIndex);
                                     }
                                 }
                                 foreach (var connection in connectionsAt)
@@ -284,13 +276,13 @@ namespace PathCreationEditor
                 }
 
                 // Connection Debug
-                using (new EditorGUI.DisabledGroupScope(true))
+                /*using (new EditorGUI.DisabledGroupScope(true))
                 {
                     EditorGUILayout.IntField("OnModified count", bezierPath.OnModifiedDelegateCount);
                     EditorGUILayout.TextArea(bezierPath.OnModifiedDelegateList);
                     EditorGUILayout.IntField("OnAnchorAdded count", bezierPath.OnAnchorAddedDelegateCount);
                     EditorGUILayout.TextArea(bezierPath.OnAnchorAddedDelegateList, GUILayout.ExpandWidth(true));
-                }
+                }*/
 
 
                 if (check.changed)
