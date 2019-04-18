@@ -218,10 +218,10 @@ namespace PathCreationEditor
                     EditorGUILayout.LabelField("Add New Connection");
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        fromAnchorIndex = EditorGUILayout.IntSlider("From", fromAnchorIndex, 0, creator.bezierPath.NumAnchorPoints - 1);
-                        targetPath = (PathCreator)EditorGUILayout.ObjectField("Target Path", targetPath, typeof(PathCreator), allowSceneObjects: true);
+                        fromAnchorIndex = EditorGUILayout.IntSlider("From Anchor", fromAnchorIndex, 0, creator.bezierPath.NumAnchorPoints - 1);
+                        targetPath = (PathCreator)EditorGUILayout.ObjectField("To Path", targetPath, typeof(PathCreator), allowSceneObjects: true);
                         GUI.enabled = targetPath != null;
-                        targetAnchorIndex = EditorGUILayout.IntSlider("To", targetAnchorIndex, 0, (targetPath != null) ? targetPath.bezierPath.NumAnchorPoints - 1 : 0);
+                        targetAnchorIndex = EditorGUILayout.IntSlider("To Anchor", targetAnchorIndex, 0, (targetPath != null) ? targetPath.bezierPath.NumAnchorPoints - 1 : 0);
                         GUI.enabled = true;
 
                         bool validAnchorIndex = fromAnchorIndex >= 0 && fromAnchorIndex < bezierPath.NumAnchorPoints;
@@ -267,7 +267,7 @@ namespace PathCreationEditor
                                 GUILayout.Space(5);
                             }
                         }
-                        if (GUI.Button(EditorGUI.IndentedRect(EditorGUILayout.GetControlRect()), "Clear Connections"))
+                        if (GUI.Button(EditorGUI.IndentedRect(EditorGUILayout.GetControlRect()), "Clear All Connections"))
                         {
                             bezierPath.ClearConnections();
                         }
@@ -346,20 +346,6 @@ namespace PathCreationEditor
                     UpdateGlobalDisplaySettings();
                     SceneView.RepaintAll();
                 }
-            }
-        }
-
-        void DrawConnectionInspector(BezierPath.Connection connection)
-        {
-            using (new EditorGUILayout.HorizontalScope(GUILayout.Width(Screen.width - EditorGUI.indentLevel * 50)))
-            {
-                if (GUILayout.Button("Remove"))
-                {
-                    bezierPath.RemoveConnection(connection);
-                    connection.targetPath.bezierPath.RemoveConnection(connection.targetAnchorIndex, creator, connection.anchorIndex);
-                }
-                EditorGUILayout.LabelField(connection.targetPath.name, GUILayout.ExpandWidth(true));
-                EditorGUILayout.LabelField(connection.targetAnchorIndex.ToString(), GUILayout.Width(30));
             }
         }
 
@@ -924,9 +910,6 @@ namespace PathCreationEditor
 
             bezierPath.OnModified -= OnPathModifed;
             bezierPath.OnModified += OnPathModifed;
-
-            Debug.Log("Resubscribing");
-            bezierPath.EnsureSubscriptionsUpToDate();
 
             SceneView.RepaintAll();
             EditorApplication.QueuePlayerLoopUpdate();
