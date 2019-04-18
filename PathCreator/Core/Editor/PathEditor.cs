@@ -400,8 +400,7 @@ namespace PathCreationEditor {
                         Undo.RecordObject (creator, "Add segment");
                         if (e.control || e.command) {
                             bezierPath.AddSegmentToStart (newPathPoint);
-                        }
-                        else {
+                        } else {
                             bezierPath.AddSegmentToEnd (newPathPoint);
                         }
 
@@ -435,8 +434,7 @@ namespace PathCreationEditor {
                             selectedSegmentIndex = pathMouseInfo.closestSegmentIndex;
                             HandleUtility.Repaint ();
                         }
-                    }
-                    else {
+                    } else {
                         selectedSegmentIndex = -1;
                         HandleUtility.Repaint ();
                     }
@@ -537,16 +535,14 @@ namespace PathCreationEditor {
                         creator.transform.rotation = newRot;
                         rotationOld = newRot;
                     }
-                }
-                else if (Tools.current == Tool.Scale) {
+                } else if (Tools.current == Tool.Scale) {
                     Undo.RecordObject (creator, "Scale Path");
                     bezierPath.Scale = Handles.DoScaleHandle (bezierPath.Scale, bezierPath.Pivot, Quaternion.identity, HandleUtility.GetHandleSize (bezierPath.Pivot));
                     if (shareTransformsWithPath) {
                         creator.transform.localScale = bezierPath.Scale;
                         scaleOld = bezierPath.Scale;
                     }
-                }
-                else {
+                } else {
                     Undo.RecordObject (creator, "Move Path");
 
                     bezierPath.Pivot = bounds.center;
@@ -625,8 +621,7 @@ namespace PathCreationEditor {
                         }
                     }
 
-                }
-                else {
+                } else {
                     handlePosition = Handles.DoPositionHandle (handlePosition, Quaternion.identity);
                 }
 
@@ -646,12 +641,10 @@ namespace PathCreationEditor {
                 case PathHandle.HandleInputType.LMBClick:
                     if (Event.current.shift) {
                         handleIndexToDisplayAsTransform = -1; // disable move tool if new point added
-                    }
-                    else {
+                    } else {
                         if (handleIndexToDisplayAsTransform == i) {
                             handleIndexToDisplayAsTransform = -1; // disable move tool if clicking on point under move tool
-                        }
-                        else {
+                        } else {
                             handleIndexToDisplayAsTransform = i;
                         }
                     }
