@@ -181,6 +181,105 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &74935857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 74935859}
+  - component: {fileID: 74935858}
+  m_Layer: 0
+  m_Name: Loop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &74935858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74935857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e5ac92bc18f545cc84cd886ece82b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  editorData:
+    _bezierPath:
+      points:
+      - {x: -2.201496, y: 0.5057953, z: 0}
+      - {x: -2.3557227, y: 1.1895869, z: 0}
+      - {x: -2.501243, y: 1.3303337, z: 1.545728}
+      - {x: -2.2422085, y: 0.62652856, z: 1.9356582}
+      - {x: -2.015496, y: 0.010543883, z: 2.2769332}
+      - {x: -2.320921, y: -0.46641076, z: -0.03979741}
+      - {x: -2.201496, y: 0.5057953, z: 0}
+      isClosed: 0
+      localPosition: {x: 0, y: 0, z: 0}
+      space: 0
+      controlMode: 0
+      autoControlLength: 0.3
+      boundsUpToDate: 1
+      pivot: {x: -2.270042, y: 0.52079153, z: 0.9847395}
+      bounds:
+        m_Center: {x: -2.270042, y: 0.52079153, z: 0.9847395}
+        m_Extent: {x: 0.114160895, y: 0.5703075, z: 0.9852466}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+      perAnchorNormalsAngle:
+      - 0
+      - 0
+      - 0
+      globalNormalsAngle: 0
+      flipNormals: 0
+      connections:
+      - path: {fileID: 74935858}
+        anchorIndex: 0
+        targetPath: {fileID: 1233812333}
+        targetAnchorIndex: 0
+      connectionsUpToDate: 0
+    vertexPathUpToDate: 1
+    vertexPathMaxAngleError: 0.3
+    vertexPathMinVertexSpacing: 0.01
+    pathTransformationEnabled: 0
+    showPathBounds: 0
+    showPerSegmentBounds: 0
+    displayAnchorPoints: 1
+    displayControlPoints: 1
+    bezierHandleScale: 1
+    globalDisplaySettingsFoldout: 0
+    keepConstantHandleSize: 0
+    vertexHandleSize: 0.2
+    showNormalsInVertexMode: 0
+    showDisplayOptions: 0
+    showPathOptions: 1
+    showVertexPathDisplayOptions: 0
+    showVertexPathOptions: 1
+    showNormals: 0
+    showNormalsHelpInfo: 0
+    showConnectionOptions: 1
+    tabIndex: 0
+  initialized: 1
+--- !u!4 &74935859
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74935857}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1233812334}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &106325661
 GameObject:
   m_ObjectHideFlags: 0
@@ -213,23 +312,23 @@ MonoBehaviour:
   editorData:
     _bezierPath:
       points:
-      - {x: 3.6454792, y: 0, z: 0}
-      - {x: 3.9712205, y: -0.9756286, z: 0}
-      - {x: 2.5076833, y: -2.0461645, z: 0}
-      - {x: 1.3603857, y: -2.1066015, z: 0}
-      - {x: 0.72404593, y: -2.1401224, z: 0}
-      - {x: 0.7092829, y: -1.692822, z: 0}
-      - {x: 0.31857854, y: -1.2253519, z: 0}
+      - {x: 2.734868, y: -0.3059901, z: 0}
+      - {x: 2.8422132, y: -0.8356559, z: 0}
+      - {x: 2.777134, y: -1.896395, z: 0}
+      - {x: 2.0590925, y: -2.170133, z: 0}
+      - {x: 1.4636714, y: -2.3971248, z: 0}
+      - {x: 0.89492035, y: -1.2977433, z: 0}
+      - {x: 0.70231986, y: -0.98882025, z: 0}
       isClosed: 0
       localPosition: {x: 0, y: 0, z: 0}
       space: 1
       controlMode: 0
       autoControlLength: 0.3
       boundsUpToDate: 0
-      pivot: {x: 2.0051327, y: -1.0544736, z: 0}
+      pivot: {x: 1.7390318, y: -1.2533712, z: 0}
       bounds:
-        m_Center: {x: 2.0051327, y: -1.0544736, z: 0}
-        m_Extent: {x: 1.6865541, y: 1.0544736, z: 0}
+        m_Center: {x: 1.7390318, y: -1.2533712, z: 0}
+        m_Extent: {x: 1.0367119, y: 0.9473812, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
       perAnchorNormalsAngle:
@@ -239,23 +338,29 @@ MonoBehaviour:
       globalNormalsAngle: 0
       flipNormals: 0
       connections:
-      - anchorIndex: 0
+      - path: {fileID: 106325662}
+        anchorIndex: 0
         targetPath: {fileID: 1233812333}
         targetAnchorIndex: 3
-      - anchorIndex: 2
+      - path: {fileID: 106325662}
+        anchorIndex: 2
         targetPath: {fileID: 1233812333}
         targetAnchorIndex: 4
+      - path: {fileID: 106325662}
+        anchorIndex: 1
+        targetPath: {fileID: 188613079}
+        targetAnchorIndex: 2
       connectionsUpToDate: 0
     vertexPathUpToDate: 1
     vertexPathMaxAngleError: 0.3
     vertexPathMinVertexSpacing: 0.01
     pathTransformationEnabled: 0
     showPathBounds: 0
-    showPerSegmentBounds: 1
+    showPerSegmentBounds: 0
     displayAnchorPoints: 1
     displayControlPoints: 1
     bezierHandleScale: 1
-    globalDisplaySettingsFoldout: 1
+    globalDisplaySettingsFoldout: 0
     keepConstantHandleSize: 0
     vertexHandleSize: 0.2
     showNormalsInVertexMode: 0
@@ -281,6 +386,109 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1233812334}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &188613078
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 188613080}
+  - component: {fileID: 188613079}
+  m_Layer: 0
+  m_Name: Branch1-Branch2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &188613079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188613078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e5ac92bc18f545cc84cd886ece82b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  editorData:
+    _bezierPath:
+      points:
+      - {x: -0.29823694, y: 0.6652951, z: 0}
+      - {x: 0.099199355, y: 1.0502839, z: 0}
+      - {x: 1.8552389, y: -0.07021853, z: -1.9300259}
+      - {x: 1.1919395, y: -0.27645615, z: -1.7505533}
+      - {x: 0.36768997, y: -0.53273743, z: -1.5275314}
+      - {x: 2.777134, y: -1.896395, z: 0}
+      - {x: 2.0590925, y: -2.170133, z: 0}
+      isClosed: 0
+      localPosition: {x: 0, y: 0, z: 0}
+      space: 0
+      controlMode: 0
+      autoControlLength: 0.3
+      boundsUpToDate: 0
+      pivot: {x: 0.82364494, y: -1.0958472, z: -0.8811684}
+      bounds:
+        m_Center: {x: 0.82364494, y: -1.0958472, z: -0.8811684}
+        m_Extent: {x: 0.53802675, y: 1.4119364, z: 0.8811684}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+      perAnchorNormalsAngle:
+      - 0
+      - 0
+      - 0
+      globalNormalsAngle: 0
+      flipNormals: 0
+      connections:
+      - path: {fileID: 188613079}
+        anchorIndex: 0
+        targetPath: {fileID: 1303900482}
+        targetAnchorIndex: 1
+      - path: {fileID: 188613079}
+        anchorIndex: 2
+        targetPath: {fileID: 106325662}
+        targetAnchorIndex: 1
+      connectionsUpToDate: 0
+    vertexPathUpToDate: 1
+    vertexPathMaxAngleError: 0.3
+    vertexPathMinVertexSpacing: 0.01
+    pathTransformationEnabled: 0
+    showPathBounds: 0
+    showPerSegmentBounds: 0
+    displayAnchorPoints: 1
+    displayControlPoints: 1
+    bezierHandleScale: 1
+    globalDisplaySettingsFoldout: 0
+    keepConstantHandleSize: 0
+    vertexHandleSize: 0.2
+    showNormalsInVertexMode: 0
+    showDisplayOptions: 0
+    showPathOptions: 1
+    showVertexPathDisplayOptions: 0
+    showVertexPathOptions: 1
+    showNormals: 0
+    showNormalsHelpInfo: 0
+    showConnectionOptions: 1
+    tabIndex: 0
+  initialized: 1
+--- !u!4 &188613080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188613078}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.2020278, y: -0.22645056, z: -0.5049875}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &481158840
 GameObject:
@@ -396,34 +604,34 @@ MonoBehaviour:
   editorData:
     _bezierPath:
       points:
-      - {x: -2, y: 0, z: 0}
-      - {x: -2.4790263, y: 0.5821802, z: 0}
+      - {x: -2.201496, y: 0.5057953, z: 0}
+      - {x: -2.3557227, y: 1.1895869, z: 0}
       - {x: -0.41598397, y: 1.7296427, z: 0}
       - {x: 0.33245993, y: 1.7511289, z: 0}
       - {x: 0.82985806, y: 1.7654082, z: 0}
-      - {x: 1.5965061, y: 1.4409721, z: 0}
-      - {x: 1.7610638, y: 0.9365963, z: 0}
-      - {x: 2.0232227, y: 0.1330688, z: 0}
-      - {x: 3.5156968, y: 0.38871166, z: 0}
-      - {x: 3.6454792, y: 0, z: 0}
-      - {x: 3.9712205, y: -0.9756286, z: 0}
-      - {x: 0.7092829, y: -1.692822, z: 0}
-      - {x: 0.31857854, y: -1.2253519, z: 0}
-      - {x: -0.13416153, y: -0.6836573, z: 0}
-      - {x: 0.050364077, y: -0.6629623, z: 0}
-      - {x: -0.3261379, y: -0.13239837, z: 0}
-      - {x: -0.5944495, y: 0.24570453, z: 0}
-      - {x: -1.6651769, y: -0.40692413, z: 0}
+      - {x: 1.0563881, y: 0.9371469, z: 0}
+      - {x: 1.2693355, y: 0.7375247, z: 0}
+      - {x: 1.8859727, y: 0.15947342, z: 0}
+      - {x: 2.6534696, y: 0.09564912, z: 0}
+      - {x: 2.734868, y: -0.3059901, z: 0}
+      - {x: 2.8422132, y: -0.835656, z: 0}
+      - {x: 0.89492035, y: -1.2977433, z: 0}
+      - {x: 0.70231986, y: -0.98882025, z: 0}
+      - {x: 0.44988602, y: -0.58392704, z: 0}
+      - {x: -0.30412933, y: -1.170043, z: 0}
+      - {x: -0.4291717, y: -0.757647, z: 0}
+      - {x: -0.49906835, y: -0.5271244, z: 0}
+      - {x: -2.0855532, y: -0.00825727, z: 0}
       isClosed: 1
-      localPosition: {x: 0, y: 0, z: 0}
+      localPosition: {x: 0.0030246377, y: -0.004442513, z: 0}
       space: 1
       controlMode: 0
       autoControlLength: 0.3
-      boundsUpToDate: 1
-      pivot: {x: 0.7984868, y: 0.18989462, z: 0}
+      boundsUpToDate: 0
+      pivot: {x: 1.1571286, y: 1.9629726, z: 0}
       bounds:
-        m_Center: {x: 0.7984868, y: 0.18989462, z: 0}
-        m_Extent: {x: 2.8698187, y: 1.5616872, z: 0}
+        m_Center: {x: 1.1571286, y: 1.9629726, z: 0}
+        m_Extent: {x: 1.585041, y: 3.0556808, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
       perAnchorNormalsAngle:
@@ -436,17 +644,29 @@ MonoBehaviour:
       globalNormalsAngle: 0
       flipNormals: 0
       connections:
-      - anchorIndex: 5
+      - path: {fileID: 1233812333}
+        anchorIndex: 5
         targetPath: {fileID: 1303900482}
         targetAnchorIndex: 0
-      - anchorIndex: 2
-        targetPath: {fileID: 1303900482}
-        targetAnchorIndex: 1
-      - anchorIndex: 3
+      - path: {fileID: 1233812333}
+        anchorIndex: 3
         targetPath: {fileID: 106325662}
         targetAnchorIndex: 0
-      - anchorIndex: 4
+      - path: {fileID: 1233812333}
+        anchorIndex: 4
         targetPath: {fileID: 106325662}
+        targetAnchorIndex: 2
+      - path: {fileID: 1233812333}
+        anchorIndex: 2
+        targetPath: {fileID: 1303900482}
+        targetAnchorIndex: 2
+      - path: {fileID: 1233812333}
+        anchorIndex: 0
+        targetPath: {fileID: 74935858}
+        targetAnchorIndex: 0
+      - path: {fileID: 1233812333}
+        anchorIndex: 0
+        targetPath: {fileID: 74935858}
         targetAnchorIndex: 2
       connectionsUpToDate: 0
     vertexPathUpToDate: 1
@@ -468,7 +688,7 @@ MonoBehaviour:
     showVertexPathOptions: 1
     showNormals: 0
     showNormalsHelpInfo: 0
-    showConnectionOptions: 0
+    showConnectionOptions: 1
     tabIndex: 0
   initialized: 1
 --- !u!4 &1233812334
@@ -479,11 +699,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1233812332}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1303900483}
   - {fileID: 106325663}
+  - {fileID: 74935859}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -519,36 +740,44 @@ MonoBehaviour:
   editorData:
     _bezierPath:
       points:
-      - {x: -0.3261379, y: -0.13239837, z: 0}
-      - {x: -0.5944495, y: 0.24570453, z: 0}
-      - {x: 1.596506, y: 1.4409728, z: 0}
-      - {x: 1.7610638, y: 0.9365963, z: 0}
-      - {x: 2.0232227, y: 0.1330688, z: 0}
-      - {x: 0.22614759, y: -0.9106753, z: 0}
-      isClosed: 1
+      - {x: -0.4291717, y: -0.757647, z: 0}
+      - {x: -0.49906835, y: -0.5271244, z: 0}
+      - {x: -0.70304394, y: 0.27316695, z: 0}
+      - {x: -0.29823694, y: 0.6652951, z: 0}
+      - {x: 0.099199355, y: 1.0502839, z: 0}
+      - {x: 1.0563881, y: 0.9371469, z: 0}
+      - {x: 1.2693355, y: 0.7375247, z: 0}
+      isClosed: 0
       localPosition: {x: 0, y: 0, z: 0}
       space: 1
       controlMode: 0
       autoControlLength: 0.3
-      boundsUpToDate: 0
-      pivot: {x: 0.92138404, y: 0.7135788, z: 0}
+      boundsUpToDate: 1
+      pivot: {x: 0.36330128, y: 0.08162913, z: 0}
       bounds:
-        m_Center: {x: 0.92138404, y: 0.7135788, z: 0}
-        m_Extent: {x: 0.87819535, y: 0.43045056, z: 0}
+        m_Center: {x: 0.36330128, y: 0.08162913, z: 0}
+        m_Extent: {x: 0.90603423, y: 0.8392761, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
       perAnchorNormalsAngle:
       - 0
       - 0
+      - 0
       globalNormalsAngle: 0
       flipNormals: 0
       connections:
-      - anchorIndex: 0
+      - path: {fileID: 1303900482}
+        anchorIndex: 0
         targetPath: {fileID: 1233812333}
         targetAnchorIndex: 5
-      - anchorIndex: 1
+      - path: {fileID: 1303900482}
+        anchorIndex: 2
         targetPath: {fileID: 1233812333}
         targetAnchorIndex: 2
+      - path: {fileID: 1303900482}
+        anchorIndex: 1
+        targetPath: {fileID: 188613079}
+        targetAnchorIndex: 0
       connectionsUpToDate: 0
     vertexPathUpToDate: 1
     vertexPathMaxAngleError: 0.3
