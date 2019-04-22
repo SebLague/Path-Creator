@@ -60,6 +60,10 @@ namespace PathCreationEditor {
         Quaternion currentHandleRot = Quaternion.identity;
         Color handlesStartCol;
 
+        int fromAnchorIndex;
+        PathCreator targetPath;
+        int targetAnchorIndex;
+
         // Constants
         const int bezierPathTab = 0;
         const int vertexPathTab = 1;
@@ -120,8 +124,13 @@ namespace PathCreationEditor {
                     // If a point has been selected
                     if (handleIndexToDisplayAsTransform != -1) {
                         EditorGUILayout.LabelField ("Selected Point:");
-
+                        var anchorIndex = handleIndexToDisplayAsTransform / 3;
                         using (new EditorGUI.IndentLevelScope ()) {
+                            if (handleIndexToDisplayAsTransform % 3 == 0) {
+                                using (new EditorGUI.DisabledGroupScope (true)) {
+                                    EditorGUILayout.IntField ("Anchor Index", anchorIndex);
+                                }
+                            }
                             var currentPosition = creator.bezierPath[handleIndexToDisplayAsTransform];
                             var newPosition = EditorGUILayout.Vector3Field ("Position", currentPosition);
                             if (newPosition != currentPosition) {
@@ -130,7 +139,6 @@ namespace PathCreationEditor {
                             }
                             // Don't draw the angle field if we aren't selecting an anchor point/not in 3d space
                             if (handleIndexToDisplayAsTransform % 3 == 0 && creator.bezierPath.Space == PathSpace.xyz) {
-                                var anchorIndex = handleIndexToDisplayAsTransform / 3;
                                 var currentAngle = creator.bezierPath.GetAnchorNormalAngle (anchorIndex);
                                 var newAngle = EditorGUILayout.FloatField ("Angle", currentAngle);
                                 if (newAngle != currentAngle) {
@@ -179,6 +187,67 @@ namespace PathCreationEditor {
                     data.bezierHandleScale = Mathf.Max (0, EditorGUILayout.FloatField (new GUIContent ("Handle Scale"), data.bezierHandleScale));
                     DrawGlobalDisplaySettingsInspector ();
                 }
+
+                data.showConnectionOptions = EditorGUILayout.Foldout (data.showConnectionOptions, new GUIContent ("Connections"), true, boldFoldoutStyle);
+                if (data.showConnectionOptions) {
+                    EditorGUILayout.LabelField ("Add New Connection");
+                    using (new EditorGUI.IndentLevelScope ()) {
+                        fromAnchorIndex = EditorGUILayout.IntSlider ("From Anchor", fromAnchorIndex, 0, creator.bezierPath.NumAnchorPoints - 1);
+                        targetPath = (PathCreator) EditorGUILayout.ObjectField ("To Path", targetPath, typeof (PathCreator), allowSceneObjects: true);
+                        GUI.enabled = targetPath != null;
+                        targetAnchorIndex = EditorGUILayout.IntSlider ("To Anchor", targetAnchorIndex, 0, (targetPath != null) ? targetPath.bezierPath.NumAnchorPoints - 1 : 0);
+                        GUI.enabled = true;
+
+                        bool validAnchorIndex = fromAnchorIndex >= 0 && fromAnchorIndex < bezierPath.NumAnchorPoints;
+                        bool validTargetPath = targetPath != null && targetPath.bezierPath != null;
+                        bool validTargetAnchorIndex = validTargetPath && targetAnchorIndex >= 0 && targetAnchorIndex < targetPath.bezierPath.NumAnchorPoints;
+
+                        GUI.enabled = validAnchorIndex && validTargetPath && validTargetAnchorIndex;
+                        if (GUI.Button (EditorGUI.IndentedRect (EditorGUILayout.GetControlRect ()), "Create Connection")) {
+                            BezierPath.CreateTwoWayConnection (creator, fromAnchorIndex, targetPath, targetAnchorIndex);
+                            foreach (var connection in bezierPath.ConnectionsAt (fromAnchorIndex)) {
+                                BezierPath.CreateTwoWayConnection (targetPath, targetAnchorIndex, connection.targetPath, connection.targetAnchorIndex);
+                            }
+                            foreach (var connection in targetPath.bezierPath.ConnectionsAt (targetAnchorIndex)) {
+                                BezierPath.CreateTwoWayConnection (creator, fromAnchorIndex, connection.targetPath, connection.targetAnchorIndex);
+                            }
+                        }
+                        GUI.enabled = true;
+                    }
+
+                    GUILayout.Space (10);
+                    EditorGUILayout.LabelField ("Remove Connections");
+                    using (new EditorGUI.IndentLevelScope ()) {
+                        for (int anchorIndex = 0; anchorIndex < bezierPath.NumAnchorPoints; anchorIndex++) {
+                            List<BezierPath.Connection> connectionsAt = bezierPath.ConnectionsAt (anchorIndex);
+                            if (connectionsAt != null && connectionsAt.Count != 0) {
+                                if (GUI.Button (EditorGUI.IndentedRect (EditorGUILayout.GetControlRect ()), string.Format ("Anchor {0} - Remove connections", anchorIndex))) {
+                                    foreach (var connection in connectionsAt) {
+                                        BezierPath.RemoveConnectionTwoWay (creator, connection.anchorIndex, connection.targetPath, connection.targetAnchorIndex);
+                                    }
+                                }
+                                foreach (var connection in connectionsAt) {
+                                    EditorGUILayout.LabelField (connection.targetPath.name, connection.targetAnchorIndex.ToString ());
+                                }
+                                GUILayout.Space (5);
+                            }
+                        }
+                        if (GUI.Button (EditorGUI.IndentedRect (EditorGUILayout.GetControlRect ()), "Clear All Connections")) {
+                            bezierPath.ClearConnections ();
+                        }
+                    }
+
+                }
+
+                // Connection Debug
+                /*using (new EditorGUI.DisabledGroupScope(true))
+                {
+                    EditorGUILayout.IntField("OnModified count", bezierPath.OnModifiedDelegateCount);
+                    EditorGUILayout.TextArea(bezierPath.OnModifiedDelegateList);
+                    EditorGUILayout.IntField("OnAnchorAdded count", bezierPath.OnAnchorAddedDelegateCount);
+                    EditorGUILayout.TextArea(bezierPath.OnAnchorAddedDelegateList, GUILayout.ExpandWidth(true));
+                }*/
+
 
                 if (check.changed) {
                     SceneView.RepaintAll ();
@@ -415,8 +484,9 @@ namespace PathCreationEditor {
 
                 Handles.color = globalDisplaySettings.normals;
                 for (int i = 0; i < normalsVertexPath.NumVertices; i++) {
-                    Vector3 prevVertex = normalsVertexPath.vertices[Mathf.Max(0, i - 1)];
-                    Vector3 nextVertex = normalsVertexPath.vertices[Mathf.Min(normalsVertexPath.NumVertices - 1, i + 1)];
+                    Vector3 prevVertex = normalsVertexPath.vertices[Mathf.Max (0, i - 1)];
+                    Vector3 nextVertex = normalsVertexPath.vertices[Mathf.Min (normalsVertexPath.NumVertices - 1, i + 1)];
+
                     Vector3 forward = prevVertex - nextVertex;
                     forward *= globalDisplaySettings.normalsWidth;
 
@@ -425,7 +495,8 @@ namespace PathCreationEditor {
                     points[1] = points[0] + normalsVertexPath.normals[i] * globalDisplaySettings.normalsLength;
                     points[2] = points[1] + forward;
                     points[3] = points[0] + forward;
-                    Handles.DrawSolidRectangleWithOutline(points, globalDisplaySettings.normals, globalDisplaySettings.normals);
+                    Handles.DrawSolidRectangleWithOutline (points, globalDisplaySettings.normals, globalDisplaySettings.normals);
+
                 }
 
             }
