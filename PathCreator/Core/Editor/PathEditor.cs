@@ -486,6 +486,7 @@ namespace PathCreationEditor {
                 for (int i = 0; i < normalsVertexPath.NumVertices; i++) {
                     Vector3 prevVertex = normalsVertexPath.vertices[Mathf.Max (0, i - 1)];
                     Vector3 nextVertex = normalsVertexPath.vertices[Mathf.Min (normalsVertexPath.NumVertices - 1, i + 1)];
+
                     Vector3 forward = prevVertex - nextVertex;
                     forward *= globalDisplaySettings.normalsWidth;
 
@@ -495,6 +496,7 @@ namespace PathCreationEditor {
                     points[2] = points[1] + forward;
                     points[3] = points[0] + forward;
                     Handles.DrawSolidRectangleWithOutline (points, globalDisplaySettings.normals, globalDisplaySettings.normals);
+
                 }
 
             }
