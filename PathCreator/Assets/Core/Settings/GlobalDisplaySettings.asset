@@ -14,15 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anchorSize: 10
   controlSize: 7
-  alwaysDrawPath: 1
+  visibleBehindObjects: 1
+  visibleWhenNotSelected: 1
   hideAutoControls: 1
   anchorShape: 0
   controlShape: 0
-  anchor: {r: 0.95, g: 0.25, b: 0.25, a: 0.85}
-  anchorHighlighted: {r: 1, g: 0.4, b: 0.4, a: 1}
+  anchor: {r: 1, g: 0.3726415, b: 0.3726415, a: 1}
+  anchorHighlighted: {r: 0.735849, g: 0.03818085, b: 0.03818085, a: 1}
   anchorSelected: {r: 1, g: 1, b: 1, a: 1}
-  control: {r: 0.35, g: 0.6, b: 1, a: 0.85}
-  controlHighlighted: {r: 0.6, g: 0.6, b: 1, a: 1}
+  control: {r: 0.35, g: 0.6, b: 1, a: 1}
+  controlHighlighted: {r: 0.19579923, g: 0.19579923, b: 0.754717, a: 1}
   controlSelected: {r: 1, g: 1, b: 1, a: 1}
   handleDisabled: {r: 1, g: 1, b: 1, a: 0.2}
   controlLine: {r: 0, g: 0, b: 0, a: 0.7254902}
@@ -31,6 +32,5 @@ MonoBehaviour:
   bounds: {r: 1, g: 1, b: 1, a: 0.4}
   segmentBounds: {r: 1, g: 1, b: 1, a: 0.4}
   vertexPath: {r: 1, g: 1, b: 1, a: 1}
-  vertex: {r: 0, g: 0, b: 0, a: 1}
   normals: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  normalsLength: 0.1
+  normalsLength: 0.198

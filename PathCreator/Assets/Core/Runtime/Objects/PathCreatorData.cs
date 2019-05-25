@@ -23,7 +23,7 @@ namespace PathCreation
         public float vertexPathMinVertexSpacing = 0.01f;
 
         // bezier display settings
-        public bool pathTransformationEnabled;
+        public bool pathTransformationEnabled = true;
         public bool showPathBounds;
         public bool showPerSegmentBounds;
         public bool displayAnchorPoints = true;
@@ -33,8 +33,8 @@ namespace PathCreation
         public bool keepConstantHandleSize;
 
         // vertex display settings
-        public float vertexHandleSize = .2f;
         public bool showNormalsInVertexMode;
+        public bool showBezierPathInVertexMode;
 
         // Editor display states
         public bool showDisplayOptions;

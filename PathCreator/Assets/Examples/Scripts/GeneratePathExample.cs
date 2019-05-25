@@ -2,10 +2,11 @@
 
 namespace PathCreation.Examples
 {
-    // Creates a path from an array of transforms and moves along it
+    // Example of creating a path at runtime from a set of points.
+    // Moves along the generated path.
 
     [RequireComponent(typeof(TrailRenderer))]
-    public class PathFromObjects : MonoBehaviour
+    public class GeneratePathExample : MonoBehaviour
     {
         public Transform[] waypoints;
         public float speed = 8;
@@ -22,10 +23,6 @@ namespace PathCreation.Examples
                 BezierPath bezierPath = new BezierPath(waypoints, true, PathSpace.xyz);
                 // Create a vertex path from the bezier path
                 path = new VertexPath(bezierPath);
-            }
-            else
-            {
-                Debug.Log("No waypoints assigned");
             }
         }
 

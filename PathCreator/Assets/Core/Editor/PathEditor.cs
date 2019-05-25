@@ -17,7 +17,6 @@ namespace PathCreationEditor {
         const float segmentSelectDistanceThreshold = 10f;
         const float screenPolylineMaxAngleError = .3f;
         const float screenPolylineMinVertexDst = .01f;
-        bool shareTransformsWithPath = false; // Should changes to pathcreator's transform affect the path (and vice versa)
 
         // Help messages:
         const string helpInfo = "Shift-click to add or insert new points. Control-click to delete points. For more detailed infomation, please refer to the documentation.";
@@ -28,7 +27,7 @@ namespace PathCreationEditor {
         // Display
         const int inspectorSectionSpacing = 10;
         const float constantHandleScale = .01f;
-        const float normalsSpacing = .1f;
+        const float normalsSpacing = .2f;
         GUIStyle boldFoldoutStyle;
 
         // References:
@@ -188,6 +187,11 @@ namespace PathCreationEditor {
         }
 
         void DrawVertexPathInspector () {
+
+            GUILayout.Space (inspectorSectionSpacing);
+            EditorGUILayout.LabelField ("Vertex count: " + data.vertexPath.NumVertices);
+            GUILayout.Space (inspectorSectionSpacing);
+
             data.showVertexPathOptions = EditorGUILayout.Foldout (data.showVertexPathOptions, new GUIContent ("Vertex Path Options"), true, boldFoldoutStyle);
             if (data.showVertexPathOptions) {
                 using (var check = new EditorGUI.ChangeCheckScope ()) {
@@ -206,8 +210,8 @@ namespace PathCreationEditor {
             data.showVertexPathDisplayOptions = EditorGUILayout.Foldout (data.showVertexPathDisplayOptions, new GUIContent ("Display Options"), true, boldFoldoutStyle);
             if (data.showVertexPathDisplayOptions) {
                 using (var check = new EditorGUI.ChangeCheckScope ()) {
-                    data.vertexHandleSize = EditorGUILayout.Slider (new GUIContent ("Vertex Scale"), data.vertexHandleSize, 0, 1);
                     data.showNormalsInVertexMode = GUILayout.Toggle (data.showNormalsInVertexMode, new GUIContent ("Show Normals"));
+                    data.showBezierPathInVertexMode = GUILayout.Toggle (data.showBezierPathInVertexMode, new GUIContent ("Show Bezier Path"));
 
                     if (check.changed) {
                         SceneView.RepaintAll ();
@@ -237,20 +241,31 @@ namespace PathCreationEditor {
         #region Scene GUI
 
         void OnSceneGUI () {
+            if (!globalDisplaySettings.visibleBehindObjects) {
+                Handles.zTest = UnityEngine.Rendering.CompareFunction.LessEqual;
+            }
+
+            EventType eventType = Event.current.type;
+
             using (var check = new EditorGUI.ChangeCheckScope ()) {
                 handlesStartCol = Handles.color;
                 switch (data.tabIndex) {
                     case bezierPathTab:
-                        ProcessBezierPathInput (Event.current);
+                        if (eventType != EventType.Repaint && eventType != EventType.Layout) {
+                            ProcessBezierPathInput (Event.current);
+                        }
+
                         DrawBezierPathSceneEditor ();
                         break;
                     case vertexPathTab:
-                        DrawVertexPathSceneEditor ();
+                        if (eventType == EventType.Repaint) {
+                            DrawVertexPathSceneEditor ();
+                        }
                         break;
                 }
 
                 // Don't allow clicking over empty space to deselect the object
-                if (Event.current.type == EventType.Layout) {
+                if (eventType == EventType.Layout) {
                     HandleUtility.AddDefaultControl (0);
                 }
 
@@ -265,12 +280,15 @@ namespace PathCreationEditor {
             Color bezierCol = globalDisplaySettings.bezierPath;
             bezierCol.a *= .5f;
 
-            for (int i = 0; i < bezierPath.NumSegments; i++) {
-                Vector3[] points = bezierPath.GetPointsInSegment (i);
-                Handles.DrawBezier (points[0], points[3], points[1], points[2], bezierCol, null, 2);
+            if (data.showBezierPathInVertexMode) {
+                for (int i = 0; i < bezierPath.NumSegments; i++) {
+                    Vector3[] points = bezierPath.GetPointsInSegment (i);
+                    Handles.DrawBezier (points[0], points[3], points[1], points[2], bezierCol, null, 2);
+                }
             }
 
             Handles.color = globalDisplaySettings.vertexPath;
+
             for (int i = 0; i < creator.path.NumVertices; i++) {
                 int nextIndex = (i + 1) % creator.path.NumVertices;
                 if (nextIndex != 0 || bezierPath.IsClosed) {
@@ -280,14 +298,12 @@ namespace PathCreationEditor {
 
             if (data.showNormalsInVertexMode) {
                 Handles.color = globalDisplaySettings.normals;
+                Vector3[] normalLines = new Vector3[creator.path.NumVertices * 2];
                 for (int i = 0; i < creator.path.NumVertices; i++) {
-                    Handles.DrawLine (creator.path.vertices[i], creator.path.vertices[i] + creator.path.normals[i] * globalDisplaySettings.normalsLength);
+                    normalLines[i * 2] = creator.path.vertices[i];
+                    normalLines[i * 2 + 1] = creator.path.vertices[i] + creator.path.normals[i] * globalDisplaySettings.normalsLength;
                 }
-            }
-
-            Handles.color = globalDisplaySettings.vertex;
-            for (int i = 0; i < creator.path.NumVertices; i++) {
-                Handles.SphereHandleCap (0, creator.path.vertices[i], Quaternion.identity, data.vertexHandleSize * .1f, EventType.Repaint);
+                Handles.DrawLines (normalLines);
             }
         }
 
@@ -373,83 +389,63 @@ namespace PathCreationEditor {
                 }
             }
 
-            if (shareTransformsWithPath) {
-                // Move bezier path if creator's transform position has changed
-                if (creator.transform.position != positionOld) {
-                    bezierPath.Position += (creator.transform.position - positionOld);
-                    positionOld = creator.transform.position;
-                }
-                // Rotate bezier path if creator's transform rotation has changed
-                if (creator.transform.rotation != rotationOld) {
-                    bezierPath.Rotation = creator.transform.rotation;
-                    creator.transform.rotation = bezierPath.Rotation; // set to constrained value
-                    rotationOld = creator.transform.rotation;
-                }
-                // Scale bezier path if creator's transform scale has changed
-                if (creator.transform.localScale != scaleOld) {
-                    bezierPath.Scale = creator.transform.localScale;
-                    creator.transform.localScale = bezierPath.Scale; // set to constrained value
-                    scaleOld = creator.transform.localScale;
-                }
-            }
-
             shiftLastFrame = e.shift;
 
         }
 
         void DrawBezierPathSceneEditor () {
+
             bool displayControlPoints = data.displayControlPoints && (bezierPath.ControlPointMode != BezierPath.ControlMode.Automatic || !globalDisplaySettings.hideAutoControls);
             Bounds bounds = bezierPath.PathBounds;
 
-            // Draw normals
-            if (data.showNormals) {
-                if (!hasUpdatedNormalsVertexPath) {
-                    normalsVertexPath = new VertexPath (bezierPath, normalsSpacing);
-                    hasUpdatedNormalsVertexPath = true;
+            if (Event.current.type == EventType.Repaint) {
+                for (int i = 0; i < bezierPath.NumSegments; i++) {
+                    Vector3[] points = bezierPath.GetPointsInSegment (i);
+
+                    if (data.showPerSegmentBounds) {
+                        Bounds segmentBounds = CubicBezierUtility.CalculateBounds (points);
+                        Handles.color = globalDisplaySettings.segmentBounds;
+                        Handles.DrawWireCube (segmentBounds.center, segmentBounds.size);
+                    }
+
+                    // Draw lines between control points
+                    if (displayControlPoints) {
+                        Handles.color = (bezierPath.ControlPointMode == BezierPath.ControlMode.Automatic) ? globalDisplaySettings.handleDisabled : globalDisplaySettings.controlLine;
+                        Handles.DrawLine (points[1], points[0]);
+                        Handles.DrawLine (points[2], points[3]);
+                    }
+
+                    // Draw path
+                    bool highlightSegment = (i == selectedSegmentIndex && Event.current.shift && draggingHandleIndex == -1 && mouseOverHandleIndex == -1);
+                    Color segmentCol = (highlightSegment) ? globalDisplaySettings.highlightedPath : globalDisplaySettings.bezierPath;
+                    Handles.DrawBezier (points[0], points[3], points[1], points[2], segmentCol, null, 2);
                 }
 
-                if (editingNormalsOld != data.showNormals) {
-                    editingNormalsOld = data.showNormals;
-                    Repaint ();
+                if (data.showPathBounds) {
+                    Handles.color = globalDisplaySettings.bounds;
+                    Handles.DrawWireCube (bounds.center, bounds.size);
                 }
 
-                Handles.color = globalDisplaySettings.normals;
-                for (int i = 0; i < normalsVertexPath.NumVertices; i++) {
-                    Vector3 prevVertex = normalsVertexPath.vertices[Mathf.Max(0, i - 1)];
-                    Vector3 nextVertex = normalsVertexPath.vertices[Mathf.Min(normalsVertexPath.NumVertices - 1, i + 1)];
-                    Vector3 forward = prevVertex - nextVertex;
-                    forward *= globalDisplaySettings.normalsWidth;
+                // Draw normals
+                if (data.showNormals) {
+                    if (!hasUpdatedNormalsVertexPath) {
+                        normalsVertexPath = new VertexPath (bezierPath, normalsSpacing);
+                        hasUpdatedNormalsVertexPath = true;
+                    }
 
-                    Vector3[] points = new Vector3[4];
-                    points[0] = normalsVertexPath.vertices[i] - forward * 0.5f;
-                    points[1] = points[0] + normalsVertexPath.normals[i] * globalDisplaySettings.normalsLength;
-                    points[2] = points[1] + forward;
-                    points[3] = points[0] + forward;
-                    Handles.DrawSolidRectangleWithOutline(points, globalDisplaySettings.normals, globalDisplaySettings.normals);
+                    if (editingNormalsOld != data.showNormals) {
+                        editingNormalsOld = data.showNormals;
+                        Repaint ();
+                    }
+
+                    Vector3[] normalLines = new Vector3[normalsVertexPath.NumVertices * 2];
+                    Handles.color = globalDisplaySettings.normals;
+                    for (int i = 0; i < normalsVertexPath.NumVertices; i++) {
+                        normalLines[i * 2] = normalsVertexPath.vertices[i];
+                        normalLines[i * 2 + 1] = normalsVertexPath.vertices[i] + normalsVertexPath.normals[i] * globalDisplaySettings.normalsLength;
+                    }
+                    Handles.DrawLines (normalLines);
                 }
-
-            }
-
-            for (int i = 0; i < bezierPath.NumSegments; i++) {
-                Vector3[] points = bezierPath.GetPointsInSegment (i);
-
-                if (data.showPerSegmentBounds) {
-                    Bounds segmentBounds = CubicBezierUtility.CalculateBounds (points);
-                    Handles.color = globalDisplaySettings.segmentBounds;
-                    Handles.DrawWireCube (segmentBounds.center, segmentBounds.size);
-                }
-
-                // Draw lines between control points
-                if (displayControlPoints) {
-                    Handles.color = (bezierPath.ControlPointMode == BezierPath.ControlMode.Automatic) ? globalDisplaySettings.handleDisabled : globalDisplaySettings.controlLine;
-                    Handles.DrawLine (points[1], points[0]);
-                    Handles.DrawLine (points[2], points[3]);
-                }
-
-                // Draw path
-                bool highlightSegment = (i == selectedSegmentIndex && Event.current.shift && draggingHandleIndex == -1 && mouseOverHandleIndex == -1);
-                Color segmentCol = (highlightSegment) ? globalDisplaySettings.highlightedPath : globalDisplaySettings.bezierPath;
-                Handles.DrawBezier (points[0], points[3], points[1], points[2], segmentCol, null, 2);
             }
 
             // Draw rotate/scale/move tool
@@ -462,17 +458,10 @@ namespace PathCreationEditor {
 
                     Quaternion newRot = deltaRot * bezierPath.Rotation;
                     bezierPath.Rotation = newRot;
-                    if (shareTransformsWithPath) {
-                        creator.transform.rotation = newRot;
-                        rotationOld = newRot;
-                    }
                 } else if (Tools.current == Tool.Scale) {
                     Undo.RecordObject (creator, "Scale Path");
                     bezierPath.Scale = Handles.DoScaleHandle (bezierPath.Scale, bezierPath.Pivot, Quaternion.identity, HandleUtility.GetHandleSize (bezierPath.Pivot));
-                    if (shareTransformsWithPath) {
-                        creator.transform.localScale = bezierPath.Scale;
-                        scaleOld = bezierPath.Scale;
-                    }
+
                 } else {
                     Undo.RecordObject (creator, "Move Path");
 
@@ -480,17 +469,7 @@ namespace PathCreationEditor {
                     Vector3 newCentre = Handles.DoPositionHandle (bezierPath.Pivot, Quaternion.identity);
                     Vector3 deltaCentre = newCentre - bezierPath.Pivot;
                     bezierPath.Position += deltaCentre;
-                    if (shareTransformsWithPath) {
-                        creator.transform.position = bezierPath.Position;
-                        positionOld = bezierPath.Position;
-                    }
                 }
-
-            }
-
-            if (data.showPathBounds) {
-                Handles.color = globalDisplaySettings.bounds;
-                Handles.DrawWireCube (bounds.center, bounds.size);
             }
 
             if (data.displayAnchorPoints) {
@@ -593,45 +572,6 @@ namespace PathCreationEditor {
                 Undo.RecordObject (creator, "Move point");
                 bezierPath.MovePoint (i, handlePosition);
 
-                // If the use is holding alt, try and mirror the control point.
-                if (Event.current.modifiers == EventModifiers.Alt) {
-                    // 0 = Anchor, 1 = Left Control, 2 = Right Control
-                    var pointType = i % 3;
-
-                    // If we are selecting a control point
-                    if (pointType != 0) {
-                        // If we are selecting the left control point
-                        if (pointType == 2) {
-                            // If the path doesn't loop and the user is selecting the last control point there isn't a control point to mirror
-                            if (i < bezierPath.NumPoints - 2 && !bezierPath.IsClosed)
-                                return;
-                            // Get the index of this control's anchor.
-                            var anchorIndex = (i + 1) % bezierPath.NumPoints;
-                            var anchorPoint = bezierPath[anchorIndex];
-                            // Get the index of the anchors other control.
-                            // We don't have to loop this index b/c if it's the last control, it's anchors index will be 1.
-                            var otherControlPointIndex = anchorIndex + 1;
-                            // Move the other control point to the opposite of the selected control point's position relative to it's anchor.
-                            bezierPath.MovePoint (otherControlPointIndex, anchorPoint - (handlePosition - anchorPoint));
-                        }
-                        // If we are selecting the right control point
-                        else if (pointType == 1) {
-                            // If the path doesn't loop and the user is selecting the first control point there isn't a control point to mirror.
-                            if (i > 1 && !bezierPath.IsClosed)
-                                return;
-                            // Get the index of this control's anchor.
-                            var anchorIndex = i - 1;
-                            var anchorPoint = bezierPath[anchorIndex];
-                            // Get the index of the anchors other control.
-                            var otherControlPointIndex = anchorIndex - 1;
-                            // Make sure to loop this index back around if it is < 1.
-                            if (otherControlPointIndex < 0)
-                                otherControlPointIndex = bezierPath.NumPoints - Mathf.Abs (otherControlPointIndex);
-                            // Move the other control point to the opposite of the selected control point's position relative to it's anchor.
-                            bezierPath.MovePoint (otherControlPointIndex, anchorPoint - (handlePosition - anchorPoint));
-                        }
-                    }
-                }
             }
 
         }

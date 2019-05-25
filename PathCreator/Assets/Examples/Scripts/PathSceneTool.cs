@@ -15,13 +15,10 @@ namespace PathCreation.Examples
             }
         }
 
-        public void CreatePath()
-        {
-            if (pathCreator != null)
-            {
-                PathUpdated();
-            }
+        public void TriggerUpdate() {
+            PathUpdated();
         }
+
 
         protected virtual void OnDestroy() {
             if (onDestroyed != null) {

@@ -74,18 +74,19 @@ namespace PathCreation {
         // Draw the path when path objected is not selected (if enabled in settings)
         void OnDrawGizmos () {
 
-            if (path != null) {
+            // Only draw path gizmo if the path object is not selected
+            // (editor script is resposible for drawing when selected)
+            GameObject selectedObj = UnityEditor.Selection.activeGameObject;
+            if (selectedObj != gameObject) {
 
-                if (globalEditorDisplaySettings == null) {
-                    globalEditorDisplaySettings = GlobalDisplaySettings.Load ();
-                }
+                if (path != null) {
 
-                if (globalEditorDisplaySettings.alwaysDrawPath) {
+                    if (globalEditorDisplaySettings == null) {
+                        globalEditorDisplaySettings = GlobalDisplaySettings.Load ();
+                    }
 
-                    // Only draw path gizmo if the path object is not selected
-                    // (editor script is resposible for drawing when selected)
-                    GameObject selectedObj = UnityEditor.Selection.activeGameObject;
-                    if (selectedObj != gameObject) {
+                    if (globalEditorDisplaySettings.visibleWhenNotSelected) {
+
                         Gizmos.color = globalEditorDisplaySettings.bezierPath;
 
                         for (int i = 0; i < path.NumVertices; i++) {

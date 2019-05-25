@@ -11,12 +11,13 @@ namespace PathCreation
         public enum HandleType { Sphere, Circle, Square };
 
         [Header("Appearance")]
-        
         public float anchorSize = 10;
         public float controlSize = 7f;
         
+        [Tooltip("Should the path still be drawn when behind objects in the scene?")]
+        public bool visibleBehindObjects = true;
         [Tooltip("Should the path be drawn even when the path object is not selected?")]
-        public bool alwaysDrawPath = true;
+        public bool visibleWhenNotSelected = true;
         [Tooltip("If true, control points will be hidden when the control point mode is set to automatic. Otherwise they will inactive, but still visible.")]
         public bool hideAutoControls = true;
         public HandleType anchorShape;
@@ -43,14 +44,11 @@ namespace PathCreation
 
         [Header("Vertex Path Colours")]
         public Color vertexPath = Color.white;
-        public Color vertex = Color.black;
 
         [Header("Normals")]
         public Color normals = Color.yellow;
         [Range(0,1)]
         public float normalsLength = .1f;
-        [Range(0.005f, 0.2f)]
-        public float normalsWidth = 0.01f;
 
 #if UNITY_EDITOR
         public static GlobalDisplaySettings Load() {

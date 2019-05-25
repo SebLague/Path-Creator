@@ -26,7 +26,7 @@ namespace PathCreation.Examples
 
                     if (pathTool.autoUpdate)
                     {
-                        pathTool.CreatePath();
+                        TriggerUpdate();
 
                     }
                 }
@@ -36,7 +36,7 @@ namespace PathCreation.Examples
             {
                 if (TryFindPathCreator())
                 {
-                    pathTool.CreatePath();
+                    TriggerUpdate();
                     SceneView.RepaintAll();
                 }
             }
@@ -44,11 +44,18 @@ namespace PathCreation.Examples
         }
 
 
+        void TriggerUpdate() {
+            if (pathTool.pathCreator != null) {
+                pathTool.TriggerUpdate();
+            }
+        }
+
+
         protected virtual void OnPathModified()
         {
             if (pathTool.autoUpdate)
             {
-                pathTool.CreatePath();
+                TriggerUpdate();
             }
         }
 
@@ -60,7 +67,7 @@ namespace PathCreation.Examples
             if (TryFindPathCreator())
             {
                 Subscribe();
-                pathTool.CreatePath();
+                TriggerUpdate();
             }
         }
 
