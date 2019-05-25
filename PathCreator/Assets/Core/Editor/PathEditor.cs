@@ -53,9 +53,6 @@ namespace PathCreationEditor {
         bool hasUpdatedNormalsVertexPath;
         bool editingNormalsOld;
 
-        Vector3 positionOld;
-        Quaternion rotationOld;
-        Vector3 scaleOld;
         Quaternion currentHandleRot = Quaternion.identity;
         Color handlesStartCol;
 
@@ -588,9 +585,6 @@ namespace PathCreationEditor {
             creator = (PathCreator) target;
             bool in2DEditorMode = EditorSettings.defaultBehaviorMode == EditorBehaviorMode.Mode2D;
             creator.InitializeEditorData (in2DEditorMode);
-            positionOld = creator.transform.position;
-            rotationOld = creator.transform.rotation;
-            scaleOld = creator.transform.localScale;
 
             data.bezierCreated -= ResetState;
             data.bezierCreated += ResetState;
