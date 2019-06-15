@@ -11,6 +11,8 @@ namespace PathCreation
         public event System.Action bezierOrVertexPathModified;
         public event System.Action bezierCreated;
 
+        Transform transform;
+
         [SerializeField]
         BezierPath _bezierPath;
         VertexPath _vertexPath;
@@ -23,7 +25,7 @@ namespace PathCreation
         public float vertexPathMinVertexSpacing = 0.01f;
 
         // bezier display settings
-        public bool pathTransformationEnabled = true;
+        public bool showTransformTool = true;
         public bool showPathBounds;
         public bool showPerSegmentBounds;
         public bool displayAnchorPoints = true;
@@ -45,11 +47,12 @@ namespace PathCreation
         public bool showNormalsHelpInfo;
         public int tabIndex;
 
-        public void Initialize(Vector3 centre, bool defaultIs2D)
+        public void Initialize(Transform transform, bool defaultIs2D)
         {
+            this.transform = transform;
             if (_bezierPath == null)
             {
-                CreateBezier(centre, defaultIs2D);
+                CreateBezier(transform.position, defaultIs2D);
             }
             vertexPathUpToDate = false;
             _bezierPath.OnModified -= BezierPathEdited;
@@ -118,7 +121,7 @@ namespace PathCreation
                 if (!vertexPathUpToDate || _vertexPath == null)
                 {
                     vertexPathUpToDate = true;
-                    _vertexPath = new VertexPath(bezierPath, vertexPathMaxAngleError, vertexPathMinVertexSpacing);
+                    _vertexPath = new VertexPath(bezierPath, transform, vertexPathMaxAngleError, vertexPathMinVertexSpacing);
                 }
                 return _vertexPath;
             }

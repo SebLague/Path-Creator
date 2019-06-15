@@ -7,7 +7,7 @@ namespace PathCreation.Utility {
     /// Collection of functions related to cubic bezier curves
     /// (a curve with a start and end 'anchor' point, and two 'control' points to define the shape of the curve between the anchors)
     public static class CubicBezierUtility {
-        
+
         /// Returns point at time 't' (between 0 and 1) along bezier curve defined by 4 points (anchor_1, control_1, control_2, anchor_2)
         public static Vector3 EvaluateCurve (Vector3[] points, float t) {
             return EvaluateCurve (points[0], points[1], points[2], points[3], t);
@@ -56,14 +56,14 @@ namespace PathCreation.Utility {
             return Vector3.Cross (c, tangent).normalized;
         }
 
-        public static Bounds CalculateBounds (Vector3[] points) {
+        public static Bounds CalculateSegmentBounds (Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3) {
             MinMax3D minMax = new MinMax3D ();
-            minMax.AddValue (points[0]);
-            minMax.AddValue (points[3]);
+            minMax.AddValue (p0);
+            minMax.AddValue (p3);
 
-            List<float> extremePointTimes = ExtremePointTimes (points[0], points[1], points[2], points[3]);
+            List<float> extremePointTimes = ExtremePointTimes (p0,p1,p2,p3);
             foreach (float t in extremePointTimes) {
-                minMax.AddValue (CubicBezierUtility.EvaluateCurve (points, t));
+                minMax.AddValue (CubicBezierUtility.EvaluateCurve (p0, p1, p2, p3, t));
             }
 
             return new Bounds ((minMax.Min + minMax.Max) / 2, minMax.Max - minMax.Min);

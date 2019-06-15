@@ -52,7 +52,7 @@ namespace PathCreation {
             editorData.bezierOrVertexPathModified -= OnPathUpdated;
             editorData.bezierOrVertexPathModified += OnPathUpdated;
 
-            editorData.Initialize (transform.position, in2DMode);
+            editorData.Initialize (transform, in2DMode);
             initialized = true;
         }
 
@@ -80,6 +80,7 @@ namespace PathCreation {
             if (selectedObj != gameObject) {
 
                 if (path != null) {
+                    path.UpdateTransform(transform);
 
                     if (globalEditorDisplaySettings == null) {
                         globalEditorDisplaySettings = GlobalDisplaySettings.Load ();
@@ -89,16 +90,16 @@ namespace PathCreation {
 
                         Gizmos.color = globalEditorDisplaySettings.bezierPath;
 
-                        for (int i = 0; i < path.NumVertices; i++) {
+                        for (int i = 0; i < path.NumPoints; i++) {
                             int nextI = i + 1;
-                            if (nextI >= path.NumVertices) {
+                            if (nextI >= path.NumPoints) {
                                 if (path.isClosedLoop) {
-                                    nextI %= path.NumVertices;
+                                    nextI %= path.NumPoints;
                                 } else {
                                     break;
                                 }
                             }
-                            Gizmos.DrawLine (path.vertices[i], path.vertices[nextI]);
+                            Gizmos.DrawLine (path.GetPoint(i), path.GetPoint(nextI));
                         }
                     }
                 }

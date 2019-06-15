@@ -27,8 +27,18 @@ namespace PathCreationEditor
         Quaternion prevCamRot;
         bool premCamIsOrtho;
 
-        public ScreenSpacePolyLine(BezierPath bezierPath, float maxAngleError, float minVertexDst, float accuracy = 1)
+        readonly Transform transform;
+        readonly Vector3 transformPosition;
+        readonly Quaternion transformRotation;
+        readonly Vector3 transformScale;
+
+        public ScreenSpacePolyLine(BezierPath bezierPath, Transform transform, float maxAngleError, float minVertexDst, float accuracy = 1)
         {
+            this.transform = transform;
+            transformPosition = transform.position;
+            transformRotation = transform.rotation;
+            transformScale = transform.localScale;
+
             // Split path in vertices based on angle error
             verticesWorld = new List<Vector3>();
             vertexToPathSegmentMap = new List<int>();
@@ -109,10 +119,13 @@ namespace PathCreationEditor
 
             // Calculate length
             cumululativeLengthWorld = new float[verticesWorld.Count];
-            for (int i = 1; i < verticesWorld.Count; i++)
+            for (int i = 0; i < verticesWorld.Count; i++)
             {
-                pathLengthWorld += (verticesWorld[i - 1] - verticesWorld[i]).magnitude;
-                cumululativeLengthWorld[i] = pathLengthWorld;
+                verticesWorld[i] = MathUtility.TransformPoint(verticesWorld[i], transform, bezierPath.Space);
+                if (i > 0) {
+                    pathLengthWorld += (verticesWorld[i - 1] - verticesWorld[i]).magnitude;
+                    cumululativeLengthWorld[i] = pathLengthWorld;
+                }
             }
 
         }
@@ -171,6 +184,10 @@ namespace PathCreationEditor
             float timeAlongBezierSegment = distanceAlongBezierSegment/bezierSegmentLength;
 
             return new MouseInfo(minDst, closestPoint3D, distanceAlongPathWorld, timeAlongPath, timeAlongBezierSegment, closestBezierSegmentIndex);
+        }
+
+        public bool TransformIsOutOfDate() {
+            return transform.position != transformPosition || transform.rotation != transformRotation || transform.localScale != transformScale;
         }
 
 

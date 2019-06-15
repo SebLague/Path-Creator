@@ -213,7 +213,7 @@ namespace PathCreationEditor
                 while (idHash.Contains(id)) {
                     numIts ++;
                     id += numIts * numIts;
-                    if (numIts > 10) {
+                    if (numIts > 100) {
                         Debug.LogError("Failed to generate unique handle id.");
                         break;
                     }
