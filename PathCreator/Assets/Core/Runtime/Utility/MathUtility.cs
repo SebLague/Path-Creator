@@ -25,42 +25,42 @@ namespace PathCreation.Utility {
         public static Vector3 TransformPoint (Vector3 p, Transform t, PathSpace space) {
             var original = LockTransformToSpace (t, space);
             Vector3 transformedPoint = t.TransformPoint (p);
-            original.SetTransform(t);
+            original.SetTransform (t);
             return transformedPoint;
         }
 
         public static Vector3 InverseTransformPoint (Vector3 p, Transform t, PathSpace space) {
             var original = LockTransformToSpace (t, space);
             Vector3 transformedPoint = t.InverseTransformPoint (p);
-            original.SetTransform(t);
+            original.SetTransform (t);
             return transformedPoint;
         }
 
         public static Vector3 TransformVector (Vector3 p, Transform t, PathSpace space) {
             var original = LockTransformToSpace (t, space);
             Vector3 transformedPoint = t.TransformVector (p);
-            original.SetTransform(t);
+            original.SetTransform (t);
             return transformedPoint;
         }
 
         public static Vector3 InverseTransformVector (Vector3 p, Transform t, PathSpace space) {
             var original = LockTransformToSpace (t, space);
             Vector3 transformedPoint = t.InverseTransformVector (p);
-            original.SetTransform(t);
+            original.SetTransform (t);
             return transformedPoint;
         }
 
         public static Vector3 TransformDirection (Vector3 p, Transform t, PathSpace space) {
             var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.TransformDirection(p);
-            original.SetTransform(t);
+            Vector3 transformedPoint = t.TransformDirection (p);
+            original.SetTransform (t);
             return transformedPoint;
         }
 
         public static Vector3 InverseTransformDirection (Vector3 p, Transform t, PathSpace space) {
             var original = LockTransformToSpace (t, space);
             Vector3 transformedPoint = t.InverseTransformDirection (p);
-            original.SetTransform(t);
+            original.SetTransform (t);
             return transformedPoint;
         }
 
@@ -155,6 +155,7 @@ namespace PathCreation.Utility {
                 t.position = position;
                 t.rotation = rotation;
                 t.localScale = scale;
+
             }
         }
     }

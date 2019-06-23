@@ -22,7 +22,7 @@ namespace PathCreation {
                 if (!initialized) {
                     InitializeEditorData (false);
                 }
-                return editorData.vertexPath;
+                return editorData.GetVertexPath(transform);
             }
         }
 
@@ -49,10 +49,10 @@ namespace PathCreation {
             if (editorData == null) {
                 editorData = new PathCreatorData ();
             }
-            editorData.bezierOrVertexPathModified -= OnPathUpdated;
-            editorData.bezierOrVertexPathModified += OnPathUpdated;
+            editorData.bezierOrVertexPathModified -= TriggerPathUpdate;
+            editorData.bezierOrVertexPathModified += TriggerPathUpdate;
 
-            editorData.Initialize (transform, in2DMode);
+            editorData.Initialize (in2DMode);
             initialized = true;
         }
 
@@ -63,7 +63,7 @@ namespace PathCreation {
 
         }
 
-        void OnPathUpdated () {
+        public void TriggerPathUpdate () {
             if (pathUpdated != null) {
                 pathUpdated ();
             }
@@ -80,7 +80,7 @@ namespace PathCreation {
             if (selectedObj != gameObject) {
 
                 if (path != null) {
-                    path.UpdateTransform(transform);
+                    path.UpdateTransform (transform);
 
                     if (globalEditorDisplaySettings == null) {
                         globalEditorDisplaySettings = GlobalDisplaySettings.Load ();
@@ -99,7 +99,7 @@ namespace PathCreation {
                                     break;
                                 }
                             }
-                            Gizmos.DrawLine (path.GetPoint(i), path.GetPoint(nextI));
+                            Gizmos.DrawLine (path.GetPoint (i), path.GetPoint (nextI));
                         }
                     }
                 }

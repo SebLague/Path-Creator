@@ -53,6 +53,10 @@ namespace PathCreationEditor {
         bool hasUpdatedNormalsVertexPath;
         bool editingNormalsOld;
 
+        Vector3 transformPos;
+        Vector3 transformScale;
+        Quaternion transformRot;
+
         Color handlesStartCol;
 
         // Constants
@@ -107,7 +111,7 @@ namespace PathCreationEditor {
                     }
 
                     bezierPath.IsClosed = EditorGUILayout.Toggle ("Closed Path", bezierPath.IsClosed);
-                    data.showTransformTool = EditorGUILayout.Toggle (new GUIContent ("Show Transform"), data.showTransformTool);
+                    data.showTransformTool = EditorGUILayout.Toggle (new GUIContent ("Enable Transforms"), data.showTransformTool);
                     if (Tools.hidden == data.showTransformTool) {
                         Tools.hidden = !data.showTransformTool;
                     }
@@ -212,7 +216,7 @@ namespace PathCreationEditor {
         void DrawVertexPathInspector () {
 
             GUILayout.Space (inspectorSectionSpacing);
-            EditorGUILayout.LabelField ("Vertex count: " + data.vertexPath.NumPoints);
+            EditorGUILayout.LabelField ("Vertex count: " + creator.path.NumPoints);
             GUILayout.Space (inspectorSectionSpacing);
 
             data.showVertexPathOptions = EditorGUILayout.Foldout (data.showVertexPathOptions, new GUIContent ("Vertex Path Options"), true, boldFoldoutStyle);
@@ -296,6 +300,8 @@ namespace PathCreationEditor {
                     EditorApplication.QueuePlayerLoopUpdate ();
                 }
             }
+
+            SetTransformState ();
         }
 
         void DrawVertexPathSceneEditor () {
@@ -464,7 +470,7 @@ namespace PathCreationEditor {
                     Handles.color = globalDisplaySettings.normals;
                     for (int i = 0; i < normalsVertexPath.NumPoints; i++) {
                         normalLines[i * 2] = normalsVertexPath.GetPoint (i);
-                        normalLines[i * 2 + 1] = normalsVertexPath.GetPoint (i) + normalsVertexPath.GetNormal(i) * globalDisplaySettings.normalsLength;
+                        normalLines[i * 2 + 1] = normalsVertexPath.GetPoint (i) + normalsVertexPath.GetNormal (i) * globalDisplaySettings.normalsLength;
                     }
                     Handles.DrawLines (normalLines);
                 }
@@ -598,6 +604,19 @@ namespace PathCreationEditor {
             LoadDisplaySettings ();
             UpdateGlobalDisplaySettings ();
             ResetState ();
+            SetTransformState (true);
+        }
+
+        void SetTransformState (bool initialize = false) {
+            Transform t = creator.transform;
+            if (!initialize) {
+                if (transformPos != t.position || t.localScale != transformScale || t.rotation != transformRot) {
+                    data.PathTransformed ();
+                }
+            }
+            transformPos = t.position;
+            transformScale = t.localScale;
+            transformRot = t.rotation;
         }
 
         void OnUndoRedo () {
