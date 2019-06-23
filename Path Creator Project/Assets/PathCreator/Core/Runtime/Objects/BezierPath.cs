@@ -35,10 +35,6 @@ namespace PathCreation {
  bool boundsUpToDate;
  [SerializeField, HideInInspector]
  Bounds bounds;
- [SerializeField, HideInInspector]
- Quaternion rotation = Quaternion.identity;
- [SerializeField, HideInInspector]
- Vector3 scale = Vector3.one;
 
  // Normals settings
  [SerializeField, HideInInspector]
@@ -630,12 +626,6 @@ namespace PathCreation {
                         }
                     }
                 }
-            }
-
-            if (space != PathSpace.xyz) {
-                Vector3 axis = (space == PathSpace.xy) ? Vector3.forward : Vector3.up;
-                float angle = (space == PathSpace.xy) ? rotation.eulerAngles.z : rotation.eulerAngles.y;
-                rotation = Quaternion.AngleAxis (angle, axis);
             }
 
             NotifyPathModified ();
