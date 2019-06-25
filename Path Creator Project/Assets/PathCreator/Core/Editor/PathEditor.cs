@@ -112,8 +112,12 @@ namespace PathCreationEditor {
 
                     bezierPath.IsClosed = EditorGUILayout.Toggle ("Closed Path", bezierPath.IsClosed);
                     data.showTransformTool = EditorGUILayout.Toggle (new GUIContent ("Enable Transforms"), data.showTransformTool);
-                    if (Tools.hidden == data.showTransformTool) {
-                        Tools.hidden = !data.showTransformTool;
+
+                    Tools.hidden = !data.showTransformTool;
+
+                    // Check if out of bounds (can occur after undo operations)
+                    if (handleIndexToDisplayAsTransform >= bezierPath.NumPoints) {
+                        handleIndexToDisplayAsTransform = -1;
                     }
 
                     // If a point has been selected
@@ -140,7 +144,7 @@ namespace PathCreationEditor {
                         }
                     }
 
-                    if (data.showTransformTool) {
+                    if (data.showTransformTool & (handleIndexToDisplayAsTransform == -1)) {
                         if (GUILayout.Button ("Centre Transform")) {
 
                             Vector3 worldCentre = bezierPath.CalculateBoundsWithTransform (creator.transform).center;
@@ -312,6 +316,9 @@ namespace PathCreationEditor {
             if (data.showBezierPathInVertexMode) {
                 for (int i = 0; i < bezierPath.NumSegments; i++) {
                     Vector3[] points = bezierPath.GetPointsInSegment (i);
+                    for (int j = 0; j < points.Length; j++) {
+                        points[j] = MathUtility.TransformPoint (points[j], creator.transform, bezierPath.Space);
+                    }
                     Handles.DrawBezier (points[0], points[3], points[1], points[2], bezierCol, null, 2);
                 }
             }
@@ -341,9 +348,11 @@ namespace PathCreationEditor {
             int previousMouseOverHandleIndex = (mouseOverHandleIndex == -1) ? 0 : mouseOverHandleIndex;
             mouseOverHandleIndex = -1;
             for (int i = 0; i < bezierPath.NumPoints; i += 3) {
+
                 int handleIndex = (previousMouseOverHandleIndex + i) % bezierPath.NumPoints;
                 float handleRadius = GetHandleDiameter (globalDisplaySettings.anchorSize * data.bezierHandleScale, bezierPath[handleIndex]) / 2f;
-                float dst = HandleUtility.DistanceToCircle (bezierPath[handleIndex], handleRadius);
+                Vector3 pos = MathUtility.TransformPoint (bezierPath[handleIndex], creator.transform, bezierPath.Space);
+                float dst = HandleUtility.DistanceToCircle (pos, handleRadius);
                 if (dst == 0) {
                     mouseOverHandleIndex = handleIndex;
                     break;
@@ -382,6 +391,7 @@ namespace PathCreationEditor {
 
             // Control click or backspace/delete to remove point
             if (e.keyCode == KeyCode.Backspace || e.keyCode == KeyCode.Delete || ((e.control || e.command) && e.type == EventType.MouseDown && e.button == 0)) {
+
                 if (mouseOverHandleIndex != -1) {
                     Undo.RecordObject (creator, "Delete segment");
                     bezierPath.DeleteSegment (mouseOverHandleIndex);
@@ -426,7 +436,6 @@ namespace PathCreationEditor {
                 for (int i = 0; i < bezierPath.NumSegments; i++) {
                     Vector3[] points = bezierPath.GetPointsInSegment (i);
                     for (int j = 0; j < points.Length; j++) {
-                        //points[j] += creator.transform.position;
                         points[j] = MathUtility.TransformPoint (points[j], creator.transform, bezierPath.Space);
                     }
 
