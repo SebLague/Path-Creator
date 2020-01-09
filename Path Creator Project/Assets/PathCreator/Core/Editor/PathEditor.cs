@@ -371,17 +371,26 @@ namespace PathCreationEditor {
                         bezierPath.SplitSegment (newPathPoint, selectedSegmentIndex, pathMouseInfo.timeOnBezierSegment);
                     }
                     // If path is not a closed loop, add new point on to the end of the path
-                    else if (!bezierPath.IsClosed) {
+                    else if (!bezierPath.IsClosed)
+                    {
+                        // If control/command are held down, the point gets pre-pended, so we want to check distance
+                        // to the endpoint we are adding to
+                        var pointIdx = e.control || e.command ? 0 : bezierPath.NumPoints - 1;
                         // insert new point at same dst from scene camera as the point that comes before it (for a 3d path)
-                        float dstCamToEndpoint = (Camera.current.transform.position - bezierPath[bezierPath.NumPoints - 1]).magnitude;
-                        Vector3 newPathPoint = MouseUtility.GetMouseWorldPosition (bezierPath.Space, dstCamToEndpoint);
-                        newPathPoint = MathUtility.InverseTransformPoint (newPathPoint, creator.transform, bezierPath.Space);
+                        var endPointLocal = bezierPath[pointIdx];
+                        var endPointGlobal =
+                            MathUtility.TransformPoint(endPointLocal, creator.transform, bezierPath.Space);
+                        var distanceCameraToEndpoint = (Camera.current.transform.position - endPointGlobal).magnitude;
+                        var newPointGlobal = 
+                            MouseUtility.GetMouseWorldPosition (bezierPath.Space, distanceCameraToEndpoint);
+                        var newPointLocal = 
+                            MathUtility.InverseTransformPoint (newPointGlobal, creator.transform, bezierPath.Space);
 
                         Undo.RecordObject (creator, "Add segment");
                         if (e.control || e.command) {
-                            bezierPath.AddSegmentToStart (newPathPoint);
+                            bezierPath.AddSegmentToStart (newPointLocal);
                         } else {
-                            bezierPath.AddSegmentToEnd (newPathPoint);
+                            bezierPath.AddSegmentToEnd (newPointLocal);
                         }
 
                     }
