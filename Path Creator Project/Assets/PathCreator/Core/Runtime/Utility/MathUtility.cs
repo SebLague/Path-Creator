@@ -4,64 +4,59 @@ using UnityEngine;
 namespace PathCreation.Utility {
     public static class MathUtility {
 
-        static PosRotScale LockTransformToSpace (Transform t, PathSpace space) {
-            var original = new PosRotScale (t);
-            if (space == PathSpace.xy) {
-                t.eulerAngles = new Vector3 (0, 0, t.eulerAngles.z);
-                t.position = new Vector3 (t.position.x, t.position.y, 0);
-            } else if (space == PathSpace.xz) {
-                t.eulerAngles = new Vector3 (0, t.eulerAngles.y, 0);
-                t.position = new Vector3 (t.position.x, 0, t.position.z);
-            }
-
-            //float maxScale = Mathf.Max (t.localScale.x * t.parent.localScale.x, t.localScale.y * t.parent.localScale.y, t.localScale.z * t.parent.localScale.z);
-            float maxScale = Mathf.Max (t.lossyScale.x, t.lossyScale.y, t.lossyScale.z);
-
-            t.localScale = Vector3.one * maxScale;
-
-            return original;
-        }
-
+        // Transform point from local to world space
         public static Vector3 TransformPoint (Vector3 p, Transform t, PathSpace space) {
-            var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.TransformPoint (p);
-            original.SetTransform (t);
-            return transformedPoint;
+            // path only works correctly for uniform scales, so average out xyz global scale
+            float scale = Vector3.Dot (t.lossyScale, Vector3.one) / 3;
+            Vector3 constrainedPos = t.position;
+            Quaternion constrainedRot = t.rotation;
+            ConstrainPosRot (ref constrainedPos, ref constrainedRot, space);
+            return constrainedRot * p * scale + constrainedPos;
         }
 
+        // Transform point from world to local space
         public static Vector3 InverseTransformPoint (Vector3 p, Transform t, PathSpace space) {
-            var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.InverseTransformPoint (p);
-            original.SetTransform (t);
-            return transformedPoint;
+            Vector3 constrainedPos = t.position;
+            Quaternion constrainedRot = t.rotation;
+            ConstrainPosRot (ref constrainedPos, ref constrainedRot, space);
+
+            // path only works correctly for uniform scales, so average out xyz global scale
+            float scale = Vector3.Dot (t.lossyScale, Vector3.one) / 3;
+            var offset = p - constrainedPos;
+
+            return Quaternion.Inverse (constrainedRot) * offset / scale;
         }
 
+        // Transform vector from local to world space (affected by rotation and scale, but not position)
         public static Vector3 TransformVector (Vector3 p, Transform t, PathSpace space) {
-            var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.TransformVector (p);
-            original.SetTransform (t);
-            return transformedPoint;
+            // path only works correctly for uniform scales, so average out xyz global scale
+            float scale = Vector3.Dot (t.lossyScale, Vector3.one) / 3;
+            Quaternion constrainedRot = t.rotation;
+            ConstrainRot (ref constrainedRot, space);
+            return constrainedRot * p * scale;
         }
 
+        // Transform vector from world to local space (affected by rotation and scale, but not position)
         public static Vector3 InverseTransformVector (Vector3 p, Transform t, PathSpace space) {
-            var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.InverseTransformVector (p);
-            original.SetTransform (t);
-            return transformedPoint;
+            Quaternion constrainedRot = t.rotation;
+            ConstrainRot (ref constrainedRot, space);
+            // path only works correctly for uniform scales, so average out xyz global scale
+            float scale = Vector3.Dot (t.lossyScale, Vector3.one) / 3;
+            return Quaternion.Inverse (constrainedRot) * p / scale;
         }
 
+        // Transform vector from local to world space (affected by rotation, but not position or scale)
         public static Vector3 TransformDirection (Vector3 p, Transform t, PathSpace space) {
-            var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.TransformDirection (p);
-            original.SetTransform (t);
-            return transformedPoint;
+            Quaternion constrainedRot = t.rotation;
+            ConstrainRot (ref constrainedRot, space);
+            return constrainedRot * p;
         }
 
+        // Transform vector from world to local space (affected by rotation, but not position or scale)
         public static Vector3 InverseTransformDirection (Vector3 p, Transform t, PathSpace space) {
-            var original = LockTransformToSpace (t, space);
-            Vector3 transformedPoint = t.InverseTransformDirection (p);
-            original.SetTransform (t);
-            return transformedPoint;
+            Quaternion constrainedRot = t.rotation;
+            ConstrainRot (ref constrainedRot, space);
+            return Quaternion.Inverse (constrainedRot) * p;
         }
 
         public static bool LineSegmentsIntersect (Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2) {
@@ -140,22 +135,33 @@ namespace PathCreation.Utility {
             return signedArea >= 0;
         }
 
-        class PosRotScale {
-            public readonly Vector3 position;
-            public readonly Quaternion rotation;
-            public readonly Vector3 scale;
-
-            public PosRotScale (Transform t) {
-                this.position = t.position;
-                this.rotation = t.rotation;
-                this.scale = t.localScale;
+        static void ConstrainPosRot (ref Vector3 pos, ref Quaternion rot, PathSpace space) {
+            if (space == PathSpace.xy) {
+                var eulerAngles = rot.eulerAngles;
+                if (eulerAngles.x != 0 || eulerAngles.y != 0) {
+                    rot = Quaternion.AngleAxis (eulerAngles.z, Vector3.forward);
+                }
+                pos = new Vector3 (pos.x, pos.y, 0);
+            } else if (space == PathSpace.xz) {
+                var eulerAngles = rot.eulerAngles;
+                if (eulerAngles.x != 0 || eulerAngles.z != 0) {
+                    rot = Quaternion.AngleAxis (eulerAngles.y, Vector3.up);
+                }
+                pos = new Vector3 (pos.x, 0, pos.z);
             }
+        }
 
-            public void SetTransform (Transform t) {
-                t.position = position;
-                t.rotation = rotation;
-                t.localScale = scale;
-
+        static void ConstrainRot (ref Quaternion rot, PathSpace space) {
+            if (space == PathSpace.xy) {
+                var eulerAngles = rot.eulerAngles;
+                if (eulerAngles.x != 0 || eulerAngles.y != 0) {
+                    rot = Quaternion.AngleAxis (eulerAngles.z, Vector3.forward);
+                }
+            } else if (space == PathSpace.xz) {
+                var eulerAngles = rot.eulerAngles;
+                if (eulerAngles.x != 0 || eulerAngles.z != 0) {
+                    rot = Quaternion.AngleAxis (eulerAngles.y, Vector3.up);
+                }
             }
         }
     }
