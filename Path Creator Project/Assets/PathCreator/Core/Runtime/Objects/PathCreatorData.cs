@@ -25,6 +25,7 @@ namespace PathCreation {
         public bool showPathBounds;
         public bool showPerSegmentBounds;
         public bool displayAnchorPoints = true;
+        public bool displayAnchorNumbers = true;
         public bool displayControlPoints = true;
         public float bezierHandleScale = 1;
         public bool globalDisplaySettingsFoldout;
