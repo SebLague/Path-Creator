@@ -140,7 +140,7 @@ namespace PathCreation {
                     }
                     for (int i = 0; i < num; i++) {
                         int vertIndex = startVertIndex + i;
-                        float t = i / (num - 1f);
+                        float t = num == 1 ? 1f : i / (num - 1f);
                         float angle = startAngle + deltaAngle * t;
                         Quaternion rot = Quaternion.AngleAxis (angle, localTangents[vertIndex]);
                         localNormals[vertIndex] = (rot * localNormals[vertIndex]) * ((bezierPath.FlipNormals) ? -1 : 1);
