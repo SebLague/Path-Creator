@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PathCreation
 {
@@ -28,6 +26,10 @@ namespace PathCreation
         public Color anchor = new Color(0.95f, 0.25f, 0.25f, 0.85f);
         public Color anchorHighlighted = new Color(1, 0.57f, 0.4f);
         public Color anchorSelected = Color.white;
+
+        [Header("Anchor Numbers")] 
+        public int anchorNumberSize = 14;
+        public Color anchorNumberColor = Color.white;
 
         [Header("Control Colours")]
         public Color control = new Color(0.35f, 0.6f, 1, 0.85f);

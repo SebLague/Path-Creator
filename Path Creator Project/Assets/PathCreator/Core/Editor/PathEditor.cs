@@ -202,6 +202,11 @@ namespace PathCreationEditor {
                     data.showPathBounds = GUILayout.Toggle (data.showPathBounds, new GUIContent ("Show Path Bounds"));
                     data.showPerSegmentBounds = GUILayout.Toggle (data.showPerSegmentBounds, new GUIContent ("Show Segment Bounds"));
                     data.displayAnchorPoints = GUILayout.Toggle (data.displayAnchorPoints, new GUIContent ("Show Anchor Points"));
+                    if (data.displayAnchorPoints)
+                    {
+                        data.displayAnchorNumbers = GUILayout.Toggle(data.displayAnchorNumbers,
+                            new GUIContent("Show Anchor Numbers"));
+                    }
                     if (!(bezierPath.ControlPointMode == BezierPath.ControlMode.Automatic && globalDisplaySettings.hideAutoControls)) {
                         data.displayControlPoints = GUILayout.Toggle (data.displayControlPoints, new GUIContent ("Show Control Points"));
                     }
@@ -525,7 +530,6 @@ namespace PathCreationEditor {
             var cap = capFunctions[(isAnchorPoint) ? globalDisplaySettings.anchorShape : globalDisplaySettings.controlShape];
             PathHandle.HandleInputType handleInputType;
             handlePosition = PathHandle.DrawHandle (handlePosition, bezierPath.Space, isInteractive, handleSize, cap, handleColours, out handleInputType, i);
-
             if (doTransformHandle) {
                 // Show normals rotate tool 
                 if (data.showNormals && Tools.current == Tool.Rotate && isAnchorPoint && bezierPath.Space == PathSpace.xyz) {
@@ -558,6 +562,16 @@ namespace PathCreationEditor {
                 }
 
             }
+
+            if (isAnchorPoint && data.displayAnchorNumbers)
+            {
+                var handleNumberText = string.Format("{0}", i / 3 + 1);
+                GUIStyle handleNumberTextStyle = new GUIStyle();
+                handleNumberTextStyle.normal.textColor = globalDisplaySettings.anchorNumberColor;
+                handleNumberTextStyle.fontSize = globalDisplaySettings.anchorNumberSize;
+                Handles.Label(handlePosition, handleNumberText, handleNumberTextStyle);
+            }
+
 
             switch (handleInputType) {
                 case PathHandle.HandleInputType.LMBDrag:
@@ -596,9 +610,7 @@ namespace PathCreationEditor {
             if (bezierPath[i] != localHandlePosition) {
                 Undo.RecordObject (creator, "Move point");
                 bezierPath.MovePoint (i, localHandlePosition);
-
             }
-
         }
 
         #endregion
