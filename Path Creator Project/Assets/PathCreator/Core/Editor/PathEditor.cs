@@ -688,7 +688,7 @@ namespace PathCreationEditor {
 
             // Ensure we have an EditorState object for this creator instance
             if (editorStateMap.TryGetValue(creator, out editorState) == false)
-                editorStateMap[creator] = new EditorState();
+                editorState = editorStateMap[creator] = new EditorState();
 
             bool in2DEditorMode = EditorSettings.defaultBehaviorMode == EditorBehaviorMode.Mode2D;
             creator.InitializeEditorData (in2DEditorMode);
