@@ -680,6 +680,9 @@ namespace PathCreationEditor {
 
         void OnDisable () {
             Tools.hidden = false;
+
+            if(editorStateMap.ContainsKey(creator))
+                editorStateMap.Remove(creator);
         }
 
         void OnEnable()
