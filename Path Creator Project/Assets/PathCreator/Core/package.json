@@ -1,0 +1,8 @@
+{
+  "name": "com.seblague.pathcreator",
+  "version": "1.0.0",
+  "displayName": "Path Creator",
+  "unity": "2018.1",
+  "dependencies": {
+  }
+}
