@@ -42,22 +42,95 @@ namespace PathCreationEditor {
         ArcHandle anchorAngleHandle = new ArcHandle ();
         VertexPath normalsVertexPath;
 
-        // State variables:
-        int selectedSegmentIndex;
-        int draggingHandleIndex;
-        int mouseOverHandleIndex;
-        int handleIndexToDisplayAsTransform;
+        // Shared editor state between OnSceneGUI and OnInspectorGUI as they work with different editor instances
+        private class EditorState
+        {
+            public int selectedSegmentIndex;
+            public int draggingHandleIndex;
+            public int mouseOverHandleIndex;
+            public int handleIndexToDisplayAsTransform;
 
-        bool shiftLastFrame;
-        bool hasUpdatedScreenSpaceLine;
-        bool hasUpdatedNormalsVertexPath;
-        bool editingNormalsOld;
+            public bool shiftLastFrame;
+            public bool hasUpdatedScreenSpaceLine;
+            public bool hasUpdatedNormalsVertexPath;
+            public bool editingNormalsOld;
 
-        Vector3 transformPos;
-        Vector3 transformScale;
-        Quaternion transformRot;
+            public Vector3 transformPos;
+            public Vector3 transformScale;
+            public Quaternion transformRot;
 
-        Color handlesStartCol;
+            public Color handlesStartCol;
+        }
+
+        static Dictionary<PathCreator, EditorState> editorStateMap = new Dictionary<PathCreator, EditorState>();
+
+        EditorState editorState;
+
+        // State variables accessors:
+        int selectedSegmentIndex
+        {
+            get { return editorState.selectedSegmentIndex; }
+            set { editorState.selectedSegmentIndex = value; }
+        }
+
+        int draggingHandleIndex
+        {
+            get { return editorState.draggingHandleIndex; }
+            set { editorState.draggingHandleIndex = value; }
+        }
+        int mouseOverHandleIndex
+        {
+            get { return editorState.mouseOverHandleIndex; }
+            set { editorState.mouseOverHandleIndex = value; }
+        }
+        int handleIndexToDisplayAsTransform
+        {
+            get { return editorState.handleIndexToDisplayAsTransform; }
+            set { editorState.handleIndexToDisplayAsTransform = value; }
+        }
+
+        bool shiftLastFrame
+        {
+            get { return editorState.shiftLastFrame; }
+            set { editorState.shiftLastFrame = value; }
+        }
+        bool hasUpdatedScreenSpaceLine
+        {
+            get { return editorState.hasUpdatedScreenSpaceLine; }
+            set { editorState.hasUpdatedScreenSpaceLine = value; }
+        }
+        bool hasUpdatedNormalsVertexPath
+        {
+            get { return editorState.hasUpdatedNormalsVertexPath; }
+            set { editorState.hasUpdatedNormalsVertexPath = value; }
+        }
+        bool editingNormalsOld
+        {
+            get { return editorState.editingNormalsOld; }
+            set { editorState.editingNormalsOld = value; }
+        }
+
+        Vector3 transformPos
+        {
+            get { return editorState.transformPos; }
+            set { editorState.transformPos = value; }
+        }
+        Vector3 transformScale
+        {
+            get { return editorState.transformScale; }
+            set { editorState.transformScale = value; }
+        }
+        Quaternion transformRot
+        {
+            get { return editorState.transformRot; }
+            set { editorState.transformRot = value; }
+        }
+
+        Color handlesStartCol
+        {
+            get { return editorState.handlesStartCol; }
+            set { editorState.handlesStartCol = value; }
+        }
 
         // Constants
         const int bezierPathTab = 0;
@@ -609,8 +682,14 @@ namespace PathCreationEditor {
             Tools.hidden = false;
         }
 
-        void OnEnable () {
-            creator = (PathCreator) target;
+        void OnEnable()
+        {
+            creator = (PathCreator)target;
+
+            // Ensure we have an EditorState object for this creator instance
+            if (editorStateMap.TryGetValue(creator, out editorState) == false)
+                editorStateMap[creator] = new EditorState();
+
             bool in2DEditorMode = EditorSettings.defaultBehaviorMode == EditorBehaviorMode.Mode2D;
             creator.InitializeEditorData (in2DEditorMode);
 
