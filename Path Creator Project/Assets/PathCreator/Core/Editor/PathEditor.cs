@@ -396,7 +396,7 @@ namespace PathCreationEditor {
 
         void DrawVertexPathSceneEditor () {
 
-            Color bezierCol = globalDisplaySettings.bezierPath;
+            Color bezierCol = globalDisplaySettings.selectedBezierPath;
             bezierCol.a *= .5f;
 
             if (data.showBezierPathInVertexMode) {
@@ -549,7 +549,7 @@ namespace PathCreationEditor {
 
                     // Draw path
                     bool highlightSegment = (i == selectedSegmentIndex && Event.current.shift && draggingHandleIndex == -1 && mouseOverHandleIndex == -1);
-                    Color segmentCol = (highlightSegment) ? globalDisplaySettings.highlightedPath : globalDisplaySettings.bezierPath;
+                    Color segmentCol = (highlightSegment) ? globalDisplaySettings.highlightedPath : globalDisplaySettings.selectedBezierPath;
                     Handles.DrawBezier (points[0], points[3], points[1], points[2], segmentCol, null, 2);
                 }
 

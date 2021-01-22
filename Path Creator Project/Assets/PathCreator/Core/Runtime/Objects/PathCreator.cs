@@ -88,7 +88,7 @@ namespace PathCreation {
 
                     if (globalEditorDisplaySettings.visibleWhenNotSelected) {
 
-                        Gizmos.color = globalEditorDisplaySettings.bezierPath;
+                        Gizmos.color = globalEditorDisplaySettings.unselectedBezierPath;
 
                         for (int i = 0; i < path.NumPoints; i++) {
                             int nextI = i + 1;
