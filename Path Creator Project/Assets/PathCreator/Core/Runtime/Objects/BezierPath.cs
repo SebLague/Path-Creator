@@ -323,13 +323,13 @@ namespace PathCreation {
                         points[points.Count - 1] = points[2];
                     }
                     points.RemoveRange (0, 3);
-                } else if (anchorIndex == points.Count - 1 && !isClosed) {
-                    points.RemoveRange (anchorIndex - 2, 3);
+                } else if (anchorIndex * 3 == points.Count - 1 && !isClosed) {
+                    points.RemoveRange (anchorIndex * 3 - 2, 3);
                 } else {
-                    points.RemoveRange (anchorIndex - 1, 3);
+                    points.RemoveRange (anchorIndex * 3 - 1, 3);
                 }
 
-                perAnchorNormalsAngle.RemoveAt (anchorIndex / 3);
+                perAnchorNormalsAngle.RemoveAt (anchorIndex);
 
                 if (controlMode == ControlMode.Automatic) {
                     AutoSetAllControlPoints ();
