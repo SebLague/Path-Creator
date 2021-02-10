@@ -35,3 +35,8 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+*.DS_Store
+Path Creator Project/Logs*
+Path Creator Project/Packages*
+Path Creator Project/ProjectSettings*
