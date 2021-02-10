@@ -15,7 +15,6 @@
 /// under these terms and conditions.
 ///
 ///
-using PathCreation.Utility;
 using UnityEngine;
 
 namespace PathCreation
@@ -60,6 +59,12 @@ namespace PathCreation
           SetPoint(points.Count - 2, points[points.Count - 1] + anchorsDifferenceBackward * 0.2f);
         }
       }
+
+      for(int i = 0; i < bezierPath.NumAnchorPoints; i++)
+      {
+        perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i]);
+      }
+
       NotifyPathModified();
     }
   }
