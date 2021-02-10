@@ -15,7 +15,7 @@ namespace PathCreation {
     /// For example, adding, inserting, and deleting points.
 
     [System.Serializable]
-    public class BezierPath {
+    public partial class BezierPath {
         public event System.Action OnModified;
         public enum ControlMode { Aligned, Mirrored, Free, Automatic };
 
