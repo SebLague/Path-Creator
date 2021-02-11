@@ -21,6 +21,13 @@ namespace PathCreation
 {
   public partial class BezierPath
   {
+    protected bool isCleared;
+
+    public BezierPath(BezierPath target)
+    {
+      this.points = target.points;
+    }
+
     public void ClearPath()
     {
       int minPointsCount = 4;
@@ -35,31 +42,49 @@ namespace PathCreation
       {
         SetPoint(i, Vector3.forward * i);
       }
+
+      isCleared = true;
     }
 
     public void EncapsulatePath(PathCreator pathCreator)
     {
-      Vector3 lastAnchorSecondControl = points[points.Count - 1];
-      Vector3 firstAnchorSecondControl = points[points.Count - 1];
+      if(!isCleared)
+      {
+        Vector3 lastAnchorSecondControl = points[points.Count - 1];
+        Vector3 firstAnchorSecondControl = points[points.Count - 1];
 
-      points.Add(lastAnchorSecondControl);
-      points.Add(firstAnchorSecondControl);
+        points.Add(lastAnchorSecondControl);
+        points.Add(firstAnchorSecondControl);
+      }
 
       var bezierPath = pathCreator.bezierPath;
       for(int i = 0; i < bezierPath.NumPoints; i++)
       {
-        points.Add(pathCreator.transform.TransformPoint(bezierPath.GetPoint(i)));
-
-        if(i == 0)
+        if(!isCleared)
         {
-          var anchorsDifferenceForward = points[points.Count - 1] - points[points.Count - 4];
-          var anchorsDifferenceBackward = -anchorsDifferenceForward;
+          points.Add(pathCreator.transform.TransformPoint(bezierPath.GetPoint(i)));
 
-          SetPoint(points.Count - 3, points[points.Count - 4] + anchorsDifferenceForward * 0.2f);
-          SetPoint(points.Count - 2, points[points.Count - 1] + anchorsDifferenceBackward * 0.2f);
+          if(i == 0)
+          {
+            var anchorsDifferenceForward = points[points.Count - 1] - points[points.Count - 4];
+            var anchorsDifferenceBackward = -anchorsDifferenceForward;
+
+            SetPoint(points.Count - 3, points[points.Count - 4] + anchorsDifferenceForward * 0.2f);
+            SetPoint(points.Count - 2, points[points.Count - 1] + anchorsDifferenceBackward * 0.2f);
+          }
+        }
+        else
+        {
+          SetPoint(i, pathCreator.transform.TransformPoint(bezierPath.GetPoint(i)));
+        }
+
+        if(isCleared && i == 3)
+        {
+          isCleared = false;
         }
       }
 
+      perAnchorNormalsAngle.Clear();
       for(int i = 0; i < bezierPath.NumAnchorPoints; i++)
       {
         perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i]);
