@@ -64,13 +64,15 @@ namespace PathCreation
         {
           points.Add(pathCreator.transform.TransformPoint(bezierPath.GetPoint(i)));
 
-          if(i == 0)
+          if(i == 1)
           {
-            var anchorsDifferenceForward = points[points.Count - 1] - points[points.Count - 4];
-            var anchorsDifferenceBackward = -anchorsDifferenceForward;
+            //soft direction after merge based on previous control points
+            var endConnectionPoint = points[points.Count - 5] - points[points.Count - 6];
+            var startConnectionPoint = points[points.Count - 2] - points[points.Count - 1];
+            var anchorsDistance = points[points.Count - 2] - points[points.Count - 5];
 
-            SetPoint(points.Count - 3, points[points.Count - 4] + anchorsDifferenceForward * 0.2f);
-            SetPoint(points.Count - 2, points[points.Count - 1] + anchorsDifferenceBackward * 0.2f);
+            SetPoint(points.Count - 4, points[points.Count - 5] + endConnectionPoint.normalized * anchorsDistance.magnitude * 0.4f);
+            SetPoint(points.Count - 3, points[points.Count - 2] + startConnectionPoint.normalized * anchorsDistance.magnitude * 0.4f);
           }
         }
         else
