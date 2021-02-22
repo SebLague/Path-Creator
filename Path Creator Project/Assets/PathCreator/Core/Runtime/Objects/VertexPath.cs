@@ -201,7 +201,7 @@ namespace PathCreation {
         /// Gets point on path based on 'time' (where 0 is start, and 1 is end of path).
         public Vector3 GetPointAtTime (float t, EndOfPathInstruction endOfPathInstruction = EndOfPathInstruction.Loop) {
             var data = CalculatePercentOnPathData (t, endOfPathInstruction);
-            return Vector3.Lerp (GetPoint (data.previousIndex), GetPoint (data.nextIndex), data.percentBetweenIndices);
+            return Vector3.LerpUnclamped (GetPoint (data.previousIndex), GetPoint (data.nextIndex), data.percentBetweenIndices);
         }
 
         /// Gets forward direction on path based on 'time' (where 0 is start, and 1 is end of path).
@@ -261,6 +261,8 @@ namespace PathCreation {
         /// For a given value 't' between 0 and 1, calculate the indices of the two vertices before and after t.
         /// Also calculate how far t is between those two vertices as a percentage between 0 and 1.
         TimeOnPathData CalculatePercentOnPathData (float t, EndOfPathInstruction endOfPathInstruction) {
+            var ot = t;
+
             // Constrain t based on the end of path instruction
             switch (endOfPathInstruction) {
                 case EndOfPathInstruction.Loop:
@@ -273,6 +275,7 @@ namespace PathCreation {
                 case EndOfPathInstruction.Reverse:
                     t = Mathf.PingPong (t, 1);
                     break;
+                case EndOfPathInstruction.Extrapolate:
                 case EndOfPathInstruction.Stop:
                     t = Mathf.Clamp01 (t);
                     break;
@@ -300,8 +303,19 @@ namespace PathCreation {
                 }
             }
 
-            float abPercent = Mathf.InverseLerp (times[prevIndex], times[nextIndex], t);
+            if (endOfPathInstruction == EndOfPathInstruction.Extrapolate)
+                t = ot;
+
+            float abPercent = InverseLerpUnclamped(times[prevIndex], times[nextIndex], t);
             return new TimeOnPathData (prevIndex, nextIndex, abPercent);
+        }
+
+        public static float InverseLerpUnclamped(float a, float b, float value)
+        {
+            if (a != b)
+                return (value - a) / (b - a);
+            else
+                return 0.0f;
         }
 
         /// Calculate time data for closest point on the path from given world point
