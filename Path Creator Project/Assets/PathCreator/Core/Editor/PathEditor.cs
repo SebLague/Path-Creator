@@ -354,13 +354,18 @@ namespace PathCreationEditor {
 
             EventType eventType = Event.current.type;
 
-            if (eventType == EventType.MouseDown)
+            switch (eventType)
             {
-                isSceneViewMouseDown = true;
-            }
-            else if (eventType == EventType.MouseUp)
-            {
-                isSceneViewMouseDown = false;
+                case EventType.MouseDown:
+                    isSceneViewMouseDown = true;
+                    break;
+                case EventType.MouseUp:
+                    isSceneViewMouseDown = false;
+                    break;
+                case EventType.ExecuteCommand:
+                    if (Event.current.commandName == "FrameSelected")
+                        FrameSelected();
+                    break;
             }
 
             using (var check = new EditorGUI.ChangeCheckScope())
@@ -392,6 +397,25 @@ namespace PathCreationEditor {
             }
 
             SetTransformState ();
+        }
+
+        private void FrameSelected()
+        {
+            // keep original event from doing its thing
+            Event.current.commandName = "";
+            Event.current.Use();
+
+            var sceneView = SceneView.lastActiveSceneView;
+            if (handleIndexToDisplayAsTransform > -1)
+            {
+                var pos = creator.bezierPath[handleIndexToDisplayAsTransform];
+                sceneView.LookAt(pos, sceneView.camera.transform.rotation, creator.EditorData.bezierHandleScale);
+            }
+            else
+            {
+                var bounds = creator.bezierPath.PathBounds;
+                sceneView.Frame(bounds);
+            }
         }
 
         void DrawVertexPathSceneEditor () {
