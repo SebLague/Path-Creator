@@ -43,6 +43,12 @@ namespace PathCreation
         SetPoint(i, Vector3.forward * i);
       }
 
+      perAnchorNormalsAngle.Clear();
+      for(int i = 0; i < NumAnchorPoints; i++)
+      {
+        perAnchorNormalsAngle.Add(0);
+      }
+
       isCleared = true;
     }
 
@@ -84,12 +90,11 @@ namespace PathCreation
         {
           isCleared = false;
         }
-      }
 
-      perAnchorNormalsAngle.Clear();
-      for(int i = 0; i < bezierPath.NumAnchorPoints; i++)
-      {
-        perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i]);
+        if(i % 3 == 0)
+        {
+          perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i / 3]);
+        }
       }
 
       NotifyPathModified();
