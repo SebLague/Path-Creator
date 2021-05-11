@@ -268,7 +268,9 @@ namespace PathCreation {
                     if (t < 0) {
                         t += Mathf.CeilToInt (Mathf.Abs (t));
                     }
-                    t %= 1;
+                    if(t > 1) {
+                        t %= 1;   
+                    }
                     break;
                 case EndOfPathInstruction.Reverse:
                     t = Mathf.PingPong (t, 1);
