@@ -93,7 +93,8 @@ namespace PathCreation
 
         if(i % 3 == 0)
         {
-          perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i / 3]);
+          float normalsDifference = bezierPath.globalNormalsAngle - this.globalNormalsAngle;
+          perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i / 3] + normalsDifference);
         }
       }
 
