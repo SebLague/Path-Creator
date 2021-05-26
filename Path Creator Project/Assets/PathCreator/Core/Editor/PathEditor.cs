@@ -350,8 +350,8 @@ namespace PathCreationEditor {
             for (int i = 0; i < bezierPath.NumPoints; i += 3) {
 
                 int handleIndex = (previousMouseOverHandleIndex + i) % bezierPath.NumPoints;
-                float handleRadius = GetHandleDiameter (globalDisplaySettings.anchorSize * data.bezierHandleScale, bezierPath[handleIndex]) / 2f;
                 Vector3 pos = MathUtility.TransformPoint (bezierPath[handleIndex], creator.transform, bezierPath.Space);
+                float handleRadius = GetHandleDiameter (globalDisplaySettings.anchorSize * data.bezierHandleScale, pos) / 2f;
                 float dst = HandleUtility.DistanceToCircle (pos, handleRadius);
                 if (dst == 0) {
                     mouseOverHandleIndex = handleIndex;
@@ -510,8 +510,8 @@ namespace PathCreationEditor {
         void DrawHandle (int i) {
             Vector3 handlePosition = MathUtility.TransformPoint (bezierPath[i], creator.transform, bezierPath.Space);
 
-            float anchorHandleSize = GetHandleDiameter (globalDisplaySettings.anchorSize * data.bezierHandleScale, bezierPath[i]);
-            float controlHandleSize = GetHandleDiameter (globalDisplaySettings.controlSize * data.bezierHandleScale, bezierPath[i]);
+            float anchorHandleSize = GetHandleDiameter (globalDisplaySettings.anchorSize * data.bezierHandleScale, handlePosition);
+            float controlHandleSize = GetHandleDiameter (globalDisplaySettings.controlSize * data.bezierHandleScale, handlePosition);
 
             bool isAnchorPoint = i % 3 == 0;
             bool isInteractive = isAnchorPoint || bezierPath.ControlPointMode != BezierPath.ControlMode.Automatic;
