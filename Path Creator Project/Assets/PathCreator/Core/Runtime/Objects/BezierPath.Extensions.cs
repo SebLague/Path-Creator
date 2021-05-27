@@ -15,6 +15,9 @@
 /// under these terms and conditions.
 ///
 ///
+using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 
 namespace PathCreation
@@ -22,6 +25,42 @@ namespace PathCreation
   public partial class BezierPath
   {
     protected bool isCleared;
+
+    public BezierPath(
+      IEnumerable<Vector3> points,
+      bool isClosed = false,
+      PathSpace space = PathSpace.xyz,
+      ControlMode controlMode = ControlMode.Automatic,
+      List<float> perAnchorNormalsAngle = null
+      )
+      {
+        Vector3[] pointsArray = points.ToArray ();
+
+        if (pointsArray.Length < 2) {
+            Debug.LogError ("Path requires at least 2 anchor points.");
+        } else {
+            this.controlMode = controlMode;
+            this.perAnchorNormalsAngle = perAnchorNormalsAngle;
+
+            switch(this.controlMode)
+            {
+              default:
+                this.points = points.ToList();
+                break;
+              case ControlMode.Automatic:
+                this.points = new List<Vector3> { pointsArray[0], Vector3.zero, Vector3.zero, pointsArray[1] };
+
+                for (int i = 2; i < pointsArray.Length; i++) {
+                    AddSegmentToEnd (pointsArray[i]);
+                    perAnchorNormalsAngle.Add (0);
+                }
+                break;
+            }
+        }
+
+        this.Space = space;
+        this.IsClosed = isClosed;
+    }
 
     public BezierPath(BezierPath target)
     {
