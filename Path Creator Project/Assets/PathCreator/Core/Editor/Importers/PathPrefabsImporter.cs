@@ -89,7 +89,7 @@ namespace PathCreationEditor
                 string.Join(
                   Environment.NewLine,
                   "Trying to apply path data but there are missing mesh",
-                  key
+                  root
                 )
               );
             }
