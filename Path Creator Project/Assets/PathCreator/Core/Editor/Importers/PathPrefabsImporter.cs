@@ -41,39 +41,54 @@ namespace PathCreationEditor
 
           if(meshFilter)
           {
-            var key = meshFilter.sharedMesh.name;
+            var mesh = meshFilter.sharedMesh;
 
-            if(PathDataContainer.GetData().ContainsKey(key))
+            if(mesh)
             {
-              var data = PathDataContainer.GetData()[key];
+              var key = mesh.name;
 
-              pathCreator.bezierPath = new PathCreation.BezierPath(
-                PathDataContainer.GetPoints(data),
-                pathCreator.bezierPath.IsClosed,
-                pathCreator.bezierPath.Space,
-                pathCreator.bezierPath.ControlPointMode,
-                PathDataContainer.GetNormals(data).ToList()
-              );
+              if(PathDataContainer.GetData().ContainsKey(key))
+              {
+                var data = PathDataContainer.GetData()[key];
 
-              pathCreator.bezierPath.FlipNormals = true;
-              pathCreator.bezierPath.NotifyPathModified();
+                pathCreator.bezierPath = new PathCreation.BezierPath(
+                  PathDataContainer.GetPoints(data),
+                  pathCreator.bezierPath.IsClosed,
+                  pathCreator.bezierPath.Space,
+                  pathCreator.bezierPath.ControlPointMode,
+                  PathDataContainer.GetNormals(data).ToList()
+                );
 
-              EditorUtility.SetDirty(root);
+                pathCreator.bezierPath.FlipNormals = true;
+                pathCreator.bezierPath.NotifyPathModified();
 
-              Logs.EditorLog(
-                string.Join(
-                  Environment.NewLine,
-                  "Path data for candidate has been successfully imported",
-                  key
-                )
-              );
+                EditorUtility.SetDirty(root);
+
+                Logs.EditorLog(
+                  string.Join(
+                    Environment.NewLine,
+                    "Path data for candidate has been successfully imported",
+                    key
+                  )
+                );
+              }
+              else
+              {
+                Logs.EditorLogWarning(
+                  string.Join(
+                    Environment.NewLine,
+                    "There is no path data found for candidate",
+                    key
+                  )
+                );
+              }
             }
             else
             {
-              Logs.EditorLogWarning(
+              Logs.EditorLogError(
                 string.Join(
                   Environment.NewLine,
-                  "There is no path data found for candidate",
+                  "Trying to apply path data but there are missing mesh",
                   key
                 )
               );
