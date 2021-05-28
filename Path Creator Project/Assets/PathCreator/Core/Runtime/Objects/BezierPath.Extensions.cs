@@ -38,7 +38,7 @@ namespace PathCreation
 
       if(pointsArray.Length < 2)
       {
-          Debug.LogError("Path requires at least 2 anchor points.");
+        Debug.LogError("Path requires at least 2 anchor points.");
       }
       else
       {
@@ -61,8 +61,8 @@ namespace PathCreation
 
             for(var i = 2; i < pointsArray.Length; i++)
             {
-                AddSegmentToEnd(pointsArray[i]);
-                perAnchorNormalsAngle.Add(0);
+              AddSegmentToEnd(pointsArray[i]);
+              perAnchorNormalsAngle.Add(0);
             }
             break;
         }
