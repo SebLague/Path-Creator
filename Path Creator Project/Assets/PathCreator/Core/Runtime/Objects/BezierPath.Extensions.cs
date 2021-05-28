@@ -111,6 +111,10 @@ namespace PathCreation
         points.Add(lastAnchorSecondControl);
         points.Add(firstAnchorSecondControl);
       }
+      else
+      {
+        perAnchorNormalsAngle.Clear();
+      }
 
       var bezierPath = pathCreator.bezierPath;
       for(int i = 0; i < bezierPath.NumPoints; i++)
