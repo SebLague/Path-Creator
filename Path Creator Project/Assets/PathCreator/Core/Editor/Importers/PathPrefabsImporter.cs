@@ -60,6 +60,7 @@ namespace PathCreationEditor
                 );
 
                 pathCreator.bezierPath.FlipNormals = false;
+                pathCreator.bezierPath.GlobalNormalsAngle = 90;
                 pathCreator.bezierPath.NotifyPathModified();
 
                 EditorUtility.SetDirty(root);
