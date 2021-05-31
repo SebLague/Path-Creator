@@ -1,7 +1,9 @@
 {
     "name": "PathCreatorEditor",
     "references": [
-        "PathCreator"
+        "PathCreator",
+        "Mempic.Plugins",
+        "Mempic"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [
