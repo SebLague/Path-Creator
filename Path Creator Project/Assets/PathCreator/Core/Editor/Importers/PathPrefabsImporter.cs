@@ -59,7 +59,7 @@ namespace PathCreationEditor
                   PathDataContainer.GetNormals(data).ToList()
                 );
 
-                pathCreator.bezierPath.FlipNormals = true;
+                pathCreator.bezierPath.FlipNormals = false;
                 pathCreator.bezierPath.NotifyPathModified();
 
                 EditorUtility.SetDirty(root);
