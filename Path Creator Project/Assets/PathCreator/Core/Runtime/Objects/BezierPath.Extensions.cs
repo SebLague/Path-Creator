@@ -22,6 +22,7 @@ namespace PathCreation
   public partial class BezierPath
   {
     protected bool isCleared;
+    protected float previousBezierFinishNormalAngle;
 
     public BezierPath(BezierPath target)
     {
@@ -49,7 +50,8 @@ namespace PathCreation
         perAnchorNormalsAngle.Add(0);
       }
 
-      isCleared = true;
+      this.previousBezierFinishNormalAngle = 0;
+      this.isCleared = true;
     }
 
     public void EncapsulatePath(PathCreator pathCreator)
@@ -97,8 +99,15 @@ namespace PathCreation
 
         if(i % 3 == 0)
         {
-          float normalsDifference = this.globalNormalsAngle - bezierPath.globalNormalsAngle;
-          perAnchorNormalsAngle.Add(bezierPath.perAnchorNormalsAngle[i / 3] + normalsDifference);
+          var normalsDifference = this.globalNormalsAngle - bezierPath.globalNormalsAngle;
+          var angle = bezierPath.perAnchorNormalsAngle[i / 3] + normalsDifference + this.previousBezierFinishNormalAngle;
+
+          perAnchorNormalsAngle.Add(angle);
+
+          if(i == bezierPath.NumPoints - 1)
+          {
+            this.previousBezierFinishNormalAngle = angle;
+          }
         }
       }
 
