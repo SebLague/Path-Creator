@@ -121,9 +121,11 @@ namespace PathCreation
       var bezierPath = pathCreator.bezierPath;
       for(int i = 0; i < bezierPath.NumPoints; i++)
       {
+        var point = pathCreator.transform.TransformPoint(bezierPath.GetPoint(i));
+
         if(!isCleared)
         {
-          points.Add(pathCreator.transform.TransformPoint(bezierPath.GetPoint(i)));
+          points.Add(point);
 
           if(i == 1)
           {
@@ -138,7 +140,7 @@ namespace PathCreation
         }
         else
         {
-          SetPoint(i, pathCreator.transform.TransformPoint(bezierPath.GetPoint(i)));
+          SetPoint(i, point);
         }
 
         if(isCleared && i == 3)
