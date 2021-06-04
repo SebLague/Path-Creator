@@ -105,6 +105,20 @@ namespace PathCreation
 
     public void EncapsulatePath(PathCreator pathCreator)
     {
+      var bezierPath = pathCreator.bezierPath;
+
+      // Trying to find any duplicates and remote it segment if found
+      for(int i = 0; i < bezierPath.NumPoints; i++)
+      {
+        var point = pathCreator.transform.TransformPoint(bezierPath.GetPoint(i));
+        var epsilon = 0.1f;
+
+        if(Vector3.Distance(point, this.GetPoint(this.NumPoints - 1)) < epsilon)
+        {
+          bezierPath.DeleteSegment(0);
+        }
+      }
+
       if(!isCleared)
       {
         Vector3 lastAnchorSecondControl = points[points.Count - 1];
@@ -118,7 +132,6 @@ namespace PathCreation
         perAnchorNormalsAngle.Clear();
       }
 
-      var bezierPath = pathCreator.bezierPath;
       for(int i = 0; i < bezierPath.NumPoints; i++)
       {
         var point = pathCreator.transform.TransformPoint(bezierPath.GetPoint(i));
