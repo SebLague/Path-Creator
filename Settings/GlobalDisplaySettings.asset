@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anchorSize: 10
   controlSize: 7
-  visibleBehindObjects: 1
+  visibleBehindObjects: 0
   visibleWhenNotSelected: 1
   hideAutoControls: 1
   anchorShape: 0
@@ -27,7 +27,8 @@ MonoBehaviour:
   controlSelected: {r: 1, g: 1, b: 1, a: 1}
   handleDisabled: {r: 1, g: 1, b: 1, a: 0.2}
   controlLine: {r: 0, g: 0, b: 0, a: 0.7254902}
-  bezierPath: {r: 0, g: 1, b: 0, a: 1}
+  selectedBezierPath: {r: 0, g: 1, b: 0, a: 1}
+  unselectedBezierPath: {r: 0, g: 0.5, b: 0, a: 0.5}
   highlightedPath: {r: 1, g: 0.6, b: 0, a: 1}
   bounds: {r: 1, g: 1, b: 1, a: 0.4}
   segmentBounds: {r: 1, g: 1, b: 1, a: 0.4}

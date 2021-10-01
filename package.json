@@ -1,0 +1,15 @@
+{
+  "name": "com.seblague.pathcreator",
+  "version": "1.0.0",
+  "displayName": "Path Creator",
+  "unity": "2018.1",
+  "dependencies": {
+  },
+  "samples": [
+	{
+      "displayName": "Seb's examples",
+      "description": "The examples that came with the original repo.",
+      "path": "Samples~/Examples"
+    }
+  ]
+}
