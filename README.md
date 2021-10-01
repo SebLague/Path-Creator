@@ -6,27 +6,14 @@ Add the following path to dependencies in your manifest to install through [UPM]
     
 ```json
 "dependencies": {
-    "com.seblague.pathcreator": "https://github.com/hannesdelbeke/Path-Creator.git?path=/Path%20Creator%20Project/Assets/PathCreator/Core",  
+    "com.seblague.pathcreator": "https://github.com/krisrok/Path-Creator",  
 }
 ```
+Or from git url via Package Manager: `https://github.com/krisrok/Path-Creator.git`
 
-repo is: `https://github.com/hannesdelbeke/Path-Creator.git`
+## Examples
 
-sub directory is: `Path%20Creator%20Project/Assets/PathCreator/Core`
-
-## Repo setup 
-
-To easily stay in sync with the original repo,
-
-The package.json file is in a sub directory, in the core folder. Instead of at the repo root.
-
-It includes only the essential files, and does not install the examples and documentation.pdf
-
-## Requirements
-
-You need a unity version that supports sub directories in the github repo path
-
-Tested on Unity 2019.3.14f1.
+Seb's original examples can be added to your project via Package Manager -> Path Creator -> Samples
 
 ## Documentation    
 
