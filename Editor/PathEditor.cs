@@ -409,6 +409,7 @@ namespace PathCreationEditor {
             if (handleIndexToDisplayAsTransform > -1)
             {
                 var pos = creator.bezierPath[handleIndexToDisplayAsTransform];
+                pos = creator.transform.localToWorldMatrix.MultiplyPoint(pos);
                 sceneView.LookAt(pos, sceneView.camera.transform.rotation, creator.EditorData.bezierHandleScale);
             }
             else
