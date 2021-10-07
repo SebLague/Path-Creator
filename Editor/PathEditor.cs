@@ -414,6 +414,8 @@ namespace PathCreationEditor {
             else
             {
                 var bounds = creator.bezierPath.PathBounds;
+                bounds.min = creator.transform.localToWorldMatrix.MultiplyPoint(bounds.min);
+                bounds.max = creator.transform.localToWorldMatrix.MultiplyPoint(bounds.max);
                 sceneView.Frame(bounds);
             }
         }
