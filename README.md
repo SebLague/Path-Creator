@@ -6,7 +6,7 @@ Add the following path to dependencies in your manifest to install through [UPM]
     
 ```json
 "dependencies": {
-    "com.seblague.pathcreator": "https://github.com/krisrok/Path-Creator",  
+    "com.seblague.pathcreator": "https://github.com/krisrok/Path-Creator"
 }
 ```
 Or from git url via Package Manager: `https://github.com/krisrok/Path-Creator.git`
