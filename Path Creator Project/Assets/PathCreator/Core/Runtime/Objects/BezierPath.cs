@@ -19,55 +19,54 @@ namespace PathCreation {
         public event System.Action OnModified;
         public enum ControlMode { Aligned, Mirrored, Free, Automatic };
 
- #region Fields
+        #region Fields
 
- [SerializeField, HideInInspector]
- List<Vector3> points;
- [SerializeField, HideInInspector]
- bool isClosed;
- [SerializeField, HideInInspector]
- PathSpace space;
- [SerializeField, HideInInspector]
- ControlMode controlMode;
- [SerializeField, HideInInspector]
- float autoControlLength = .3f;
- [SerializeField, HideInInspector]
- bool boundsUpToDate;
- [SerializeField, HideInInspector]
- Bounds bounds;
+        [SerializeField, HideInInspector]
+        List<Vector3> points;
+        [SerializeField, HideInInspector]
+        bool isClosed;
+        [SerializeField, HideInInspector]
+        PathSpace space;
+        [SerializeField, HideInInspector]
+        ControlMode controlMode;
+        [SerializeField, HideInInspector]
+        float autoControlLength = .3f;
+        [SerializeField, HideInInspector]
+        bool boundsUpToDate;
+        [SerializeField, HideInInspector]
+        Bounds bounds;
 
- // Normals settings
- [SerializeField, HideInInspector]
- List<float> perAnchorNormalsAngle;
- [SerializeField, HideInInspector]
- float globalNormalsAngle;
- [SerializeField, HideInInspector]
- bool flipNormals;
+        // Normals settings
+        [SerializeField, HideInInspector]
+        List<float> perAnchorNormalsAngle;
+        [SerializeField, HideInInspector]
+        float globalNormalsAngle;
+        [SerializeField, HideInInspector]
+        bool flipNormals;
 
- #endregion
+        #endregion
 
- #region Constructors
+        #region Constructors
 
- /// <summary> Creates a two-anchor path centred around the given centre point </summary>
- ///<param name="isClosed"> Should the end point connect back to the start point? </param>
- ///<param name="space"> Determines if the path is in 3d space, or clamped to the xy/xz plane </param>
- public BezierPath (Vector3 centre, bool isClosed = false, PathSpace space = PathSpace.xyz) {
+        /// <summary> Creates a two-anchor path centred around the given centre point </summary>
+        ///<param name="isClosed"> Should the end point connect back to the start point? </param>
+        ///<param name="space"> Determines if the path is in 3d space, or clamped to the xy/xz plane </param>
+        public BezierPath (Vector3 centre, bool isClosed = false, PathSpace space = PathSpace.xyz) {
 
- Vector3 dir = (space == PathSpace.xz) ? Vector3.forward : Vector3.up;
- float width = 2;
- float controlHeight = .5f;
- float controlWidth = 1f;
- points = new List<Vector3> {
- centre + Vector3.left * width,
- centre + Vector3.left * controlWidth + dir * controlHeight,
- centre + Vector3.right * controlWidth - dir * controlHeight,
- centre + Vector3.right * width
- };
+            Vector3 dir = (space == PathSpace.xz) ? Vector3.forward : Vector3.up;
+            float width = 2;
+            float controlHeight = .5f;
+            float controlWidth = 1f;
+            points = new List<Vector3> {
+                centre + Vector3.left * width,
+                centre + Vector3.left * controlWidth + dir * controlHeight,
+                centre + Vector3.right * controlWidth - dir * controlHeight,
+                centre + Vector3.right * width
+            };
 
- perAnchorNormalsAngle = new List<float> () { 0, 0 };
-
- Space = space;
- IsClosed = isClosed;
+            perAnchorNormalsAngle = new List<float> () { 0, 0 };
+            Space = space;
+            IsClosed = isClosed;
         }
 
         /// <summary> Creates a path from the supplied 3D points </summary>
@@ -114,6 +113,20 @@ namespace PathCreation {
         ///<param name="pathSpace"> Determines if the path is in 3d space, or clamped to the xy/xz plane </param>
         public BezierPath (IEnumerable<Vector2> points, PathSpace space = PathSpace.xyz, bool isClosed = false):
             this (points.Select (p => new Vector3 (p.x, p.y)), isClosed, space) { }
+
+        /// <summary> Cloning constructor, creates a perfect copy of a BezierPath </summary>
+        public BezierPath(BezierPath path) {
+            points = new List<Vector3>(path.points);
+            isClosed = path.isClosed;
+            space = path.space;
+            controlMode = path.controlMode;
+            autoControlLength = path.autoControlLength;
+            boundsUpToDate = path.boundsUpToDate;
+            bounds = path.bounds;
+            perAnchorNormalsAngle = new List<float>(path.perAnchorNormalsAngle);
+            globalNormalsAngle = path.globalNormalsAngle;
+            flipNormals = path.flipNormals;
+        }
 
         #endregion
 
@@ -481,6 +494,17 @@ namespace PathCreation {
                 }
                 return bounds;
             }
+        }
+
+        /// Add multiple points at once to our list of points
+        public void AddPoints(List<Vector3> pointList) {
+            foreach (Vector3 point in pointList) {
+                points.Add(point);
+            }
+            if (controlMode == ControlMode.Automatic) {
+                AutoSetAllAffectedControlPoints(points.Count - 1);
+            }
+            NotifyPathModified();
         }
 
         #endregion
