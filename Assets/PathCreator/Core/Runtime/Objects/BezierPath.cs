@@ -156,31 +156,20 @@ namespace PathCreation
 		}
 
 		/// Total number of points in the path (anchors and controls)
-		public int NumPoints
-		{
-			get
-			{
-				return points.Count;
-			}
-		}
+		public int NumPoints => points?.Count ?? 0;
 
 		/// Number of anchor points making up the path
 		public int NumAnchorPoints
 		{
 			get
 			{
-				return (IsClosed) ? points.Count / 3 : (points.Count + 2) / 3;
+				int count = NumPoints;
+                		return (IsClosed) ? count / 3 : (count + 2) / 3;
 			}
 		}
 
 		/// Number of bezier curves making up this path
-		public int NumSegments
-		{
-			get
-			{
-				return points.Count / 3;
-			}
-		}
+		public int NumSegments => NumPoints / 3;
 
 		/// Path can exist in 3D (xyz), 2D (xy), or Top-Down (xz) space
 		/// In xy or xz space, points will be clamped to that plane (so in a 2D path, for example, points will always be at 0 on z axis)
