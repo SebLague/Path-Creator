@@ -46,14 +46,15 @@ namespace PathCreation
 		[SerializeField, HideInInspector]
 		bool flipNormals;
 
-		#endregion
+        #endregion
 
-		#region Constructors
+        #region Constructors
+        public BezierPath() : this(Vector3.zero, false, PathSpace.xyz) { }
 
-		/// <summary> Creates a two-anchor path centred around the given centre point </summary>
-		///<param name="isClosed"> Should the end point connect back to the start point? </param>
-		///<param name="space"> Determines if the path is in 3d space, or clamped to the xy/xz plane </param>
-		public BezierPath(Vector3 centre, bool isClosed = false, PathSpace space = PathSpace.xyz)
+        /// <summary> Creates a two-anchor path centred around the given centre point </summary>
+        ///<param name="isClosed"> Should the end point connect back to the start point? </param>
+        ///<param name="space"> Determines if the path is in 3d space, or clamped to the xy/xz plane </param>
+        public BezierPath(Vector3 centre, bool isClosed = false, PathSpace space = PathSpace.xyz)
 		{
 
 			Vector3 dir = (space == PathSpace.xz) ? Vector3.forward : Vector3.up;
